@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,23 +38,50 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+//        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         super.onCreate(savedInstanceState)
+
+        val emojis = (1..100)
+            .map { "$it line" }
+            .toList()
+
         setContent {
+            TransparentSystemBars()
             Alumnihub_appTheme {
-                // A surface container using the 'background' color from the theme
-//                Greeting("Android")
                 AlumnihubApp()
             }
         }
     }
 }
+
+@Composable
+fun TransparentSystemBars() {
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !isSystemInDarkTheme()
+
+    DisposableEffect(systemUiController, useDarkIcons) {
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = useDarkIcons
+        )
+
+        onDispose {}
+    }
+}
+
 
 sealed class Screen(
     val route: String,
@@ -70,28 +99,39 @@ sealed class Screen(
 @Preview
 fun AlumnihubApp() {
     val navController = rememberNavController()
+
     Scaffold(
-        bottomBar = { AppBar() }
+        bottomBar = { AppBar(navController) }
     ) {
-        NavHost(navController = navController, startDestination = Screen.FleaMarket.route) {
-            composable(Screen.Profile.route) { Profile() }
-            composable(Screen.FleaMarket.route) { FleaMarket() }
-            composable(Screen.LostFound.route) { LostFound() }
+        Column(Modifier.padding(it)) {
+            NavHost(navController = navController, startDestination = Screen.FleaMarket.route) {
+                composable(Screen.Profile.route) { Profile() }
+                composable(Screen.FleaMarket.route) { FleaMarket() }
+                composable(Screen.LostFound.route) { LostFound() }
+            }
         }
     }
-
 
 }
 
 @Composable
-private fun AppBar() {
+private fun AppBar(navController: NavHostController) {
     val screens = listOf(Screen.FleaMarket, Screen.LostFound, Screen.Profile)
 
-    NavigationBar {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val to = { screen: Screen ->
+        navController.navigate(screen.route) {
+            popUpTo(navController.graph.startDestinationId)
+            launchSingleTop = true
+        }
+    }
+
+    NavigationBar(containerColor = Color.White) {
         for (screen in screens) {
             NavigationBarItem(
                 selected = false,
-                onClick = { println("click first") },
+                onClick = { to(screen) },
                 icon = { Icon(screen.icon, null) },
             )
         }
