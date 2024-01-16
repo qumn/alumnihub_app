@@ -4,38 +4,36 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -49,14 +47,9 @@ import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-//        enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
-
-        val emojis = (1..100)
-            .map { "$it line" }
-            .toList()
 
         setContent {
             TransparentSystemBars()
@@ -83,43 +76,67 @@ fun TransparentSystemBars() {
 }
 
 
-sealed class Screen(
-    val route: String,
-    val label: String,
-    val icon: ImageVector,
-    val isShowBottomBar: Boolean = false
-) {
-    object FleaMarket : Screen("/flea_market", "跳蚤市场", Icons.Filled.ShoppingCart, true)
-    object LostFound : Screen("/lost_found", "失物招领", Icons.Filled.Info, true)
-    object Profile : Screen("/profile", "个人中心", Icons.Filled.Person, true)
-}
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-@Preview
+//@Preview
 fun AlumnihubApp() {
     val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = { AppBar(navController) }
+        bottomBar = { AluBottomBar(navController) }
     ) {
         Column(Modifier.padding(it)) {
-            NavHost(navController = navController, startDestination = Screen.FleaMarket.route) {
+            NavHost(
+                navController = navController,
+                startDestination = Screen.FleaMarket.route,
+                enterTransition = {
+                    slideInHorizontally(
+                        animationSpec = tween(300),
+                        initialOffsetX = { fullWidth -> fullWidth })
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        animationSpec = tween(300),
+                        targetOffsetX = { fullWidth -> -fullWidth })
+                }
+            ) {
                 composable(Screen.Profile.route) { Profile() }
                 composable(Screen.FleaMarket.route) { FleaMarket() }
                 composable(Screen.LostFound.route) { LostFound() }
             }
         }
     }
-
 }
 
+sealed class Screen(
+    val route: String,
+    val label: String,
+    val icon: @Composable () -> Unit,
+    val isShowBottomBar: Boolean = false
+) {
+    object FleaMarket :
+        Screen(
+            "/flea_market",
+            "跳蚤市场",
+            { Icon(Icons.Filled.Store, "跳蚤市场") },
+            true
+        )
+
+    object LostFound :
+        Screen("/lost_found", "失物招领", { Icon(Icons.Filled.Flag, "失物招领") }, true)
+
+    object Profile :
+        Screen("/profile", "个人中心", { Icon(Icons.Filled.Person, "个人中心") }, true)
+}
+
+
 @Composable
-private fun AppBar(navController: NavHostController) {
+private fun AluBottomBar(navController: NavHostController) {
     val screens = listOf(Screen.FleaMarket, Screen.LostFound, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
     val to = { screen: Screen ->
         navController.navigate(screen.route) {
             popUpTo(navController.graph.startDestinationId)
@@ -132,7 +149,7 @@ private fun AppBar(navController: NavHostController) {
             NavigationBarItem(
                 selected = false,
                 onClick = { to(screen) },
-                icon = { Icon(screen.icon, null) },
+                icon = screen.icon
             )
         }
     }
@@ -140,71 +157,59 @@ private fun AppBar(navController: NavHostController) {
 
 @Composable
 fun Profile() {
-    Text("Home")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Text(
+            "Home",
+            modifier = Modifier.align(Alignment.Center),
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
 }
 
 @Composable
+@Preview(showBackground = true, backgroundColor = 0xffffff)
 fun FleaMarket() {
-    Text("flea market")
+    val numbers = (0..100).toList()
+
+    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+        items(numbers) {
+            Box(
+                modifier = Modifier
+                    .background(Color.Black)
+                    .padding(8.dp)
+                    .border(1.dp, Color.LightGray)
+                    .height(82.dp),
+            ) {
+                Text(
+                    text = "$it",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+    }
+
+
 }
 
 @Composable
 fun LostFound() {
-    Text("Lost Found")
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    val tasks = remember { mutableStateListOf<String>() }
-    var task by remember { mutableStateOf("") }
-
-    Alumnihub_appTheme {
-        Surface(color = Color.Cyan) {
-            Column(
-                verticalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.padding(20.dp)
-            ) {
-                Text(
-                    text = "Todo List",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row {
-                    OutlinedTextField(
-                        value = task,
-                        modifier = Modifier
-                            .weight(0.6f)
-                            .fillMaxWidth(),
-                        onValueChange = {
-                            task = it
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        modifier = Modifier
-                            .weight(0.3f)
-                            .fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        onClick = {
-                            tasks.add(task)
-                            task = ""
-                        }) {
-                        Text(text = "Add", softWrap = false)
-                    }
-                }
-                for ((i, t) in tasks.withIndex()) {
-                    Text(text = "$i. $t", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Text(
+            "Lost Found",
+            modifier = Modifier.align(Alignment.Center),
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge
+        )
     }
 }
