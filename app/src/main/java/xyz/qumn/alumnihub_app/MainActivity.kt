@@ -22,13 +22,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,6 +47,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import xyz.qumn.alumnihub_app.composable.LocalSnackHostState
+import xyz.qumn.alumnihub_app.composable.useSnackbar
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -78,31 +84,35 @@ fun TransparentSystemBars() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-//@Preview
 fun AlumnihubApp() {
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { AluBottomBar(navController) }
-    ) {
-        Column(Modifier.padding(it)) {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.FleaMarket.route,
-                enterTransition = {
-                    slideInHorizontally(
-                        animationSpec = tween(300),
-                        initialOffsetX = { fullWidth -> fullWidth })
-                },
-                exitTransition = {
-                    slideOutHorizontally(
-                        animationSpec = tween(300),
-                        targetOffsetX = { fullWidth -> -fullWidth })
+    val snackbarHostState = SnackbarHostState()
+
+    CompositionLocalProvider(LocalSnackHostState provides snackbarHostState) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            bottomBar = { AluBottomBar(navController) },
+        ) {
+            Column(Modifier.padding(it)) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.FleaMarket.route,
+                    enterTransition = {
+                        slideInHorizontally(
+                            animationSpec = tween(300),
+                            initialOffsetX = { fullWidth -> fullWidth })
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(
+                            animationSpec = tween(300),
+                            targetOffsetX = { fullWidth -> -fullWidth })
+                    }
+                ) {
+                    composable(Screen.Profile.route) { Profile() }
+                    composable(Screen.FleaMarket.route) { FleaMarket() }
+                    composable(Screen.LostFound.route) { LostFound() }
                 }
-            ) {
-                composable(Screen.Profile.route) { Profile() }
-                composable(Screen.FleaMarket.route) { FleaMarket() }
-                composable(Screen.LostFound.route) { LostFound() }
             }
         }
     }
@@ -168,6 +178,14 @@ fun Profile() {
             color = Color.White,
             style = MaterialTheme.typography.titleLarge
         )
+
+        val snackbarHelper = useSnackbar(msg = "Hello Home")
+
+        Button(onClick = {
+            snackbarHelper.show()
+        }) {
+            Text(text = "Show message")
+        }
     }
 }
 
@@ -211,5 +229,12 @@ fun LostFound() {
             color = Color.White,
             style = MaterialTheme.typography.titleLarge
         )
+        val snackbarHelper = useSnackbar(msg = "Hello Lost Found")
+
+        Button(onClick = {
+            snackbarHelper.show()
+        }) {
+            Text(text = "Show message")
+        }
     }
 }
