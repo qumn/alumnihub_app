@@ -49,6 +49,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import xyz.qumn.alumnihub_app.composable.LocalSnackHostState
 import xyz.qumn.alumnihub_app.composable.useSnackbar
+import xyz.qumn.alumnihub_app.screen.fleamarket.FleaMarket
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -189,32 +190,6 @@ fun Profile() {
     }
 }
 
-@Composable
-@Preview(showBackground = true, backgroundColor = 0xffffff)
-fun FleaMarket() {
-    val numbers = (0..100).toList()
-
-    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-        items(numbers) {
-            Box(
-                modifier = Modifier
-                    .background(Color.Black)
-                    .padding(8.dp)
-                    .border(1.dp, Color.LightGray)
-                    .height(82.dp),
-            ) {
-                Text(
-                    text = "$it",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-    }
-
-
-}
 
 @Composable
 fun LostFound() {
