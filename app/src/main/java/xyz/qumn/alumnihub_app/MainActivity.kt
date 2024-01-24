@@ -8,16 +8,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Person
@@ -38,8 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -49,7 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import xyz.qumn.alumnihub_app.composable.LocalSnackHostState
 import xyz.qumn.alumnihub_app.composable.useSnackbar
-import xyz.qumn.alumnihub_app.screen.fleamarket.FleaMarket
+import xyz.qumn.alumnihub_app.screen.fleamarket.FleaMarketFlow
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -111,7 +104,7 @@ fun AlumnihubApp() {
                     }
                 ) {
                     composable(Screen.Profile.route) { Profile() }
-                    composable(Screen.FleaMarket.route) { FleaMarket() }
+                    composable(Screen.FleaMarket.route) { FleaMarketFlow() }
                     composable(Screen.LostFound.route) { LostFound() }
                 }
             }

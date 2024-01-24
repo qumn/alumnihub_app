@@ -2,6 +2,12 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="FleaMarketCardPreview">
+        <State />
+      </entry>
+      <entry key="FleaMarketFlowPreview">
+        <State />
+      </entry>
       <entry key="PreviewSlideCarousel">
         <State />
       </entry>
