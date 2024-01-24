@@ -6,11 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,9 +23,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -33,31 +32,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import xyz.qumn.alumnihub_app.R
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SlidingCarousel(
-    imgs: List<String>,
+    images: List<String>,
     modifier: Modifier = Modifier,
     autoSlideDuration: Long = 3000,
 ) {
     SlidingCarousel(
         modifier = modifier,
         autoSlideDuration = autoSlideDuration,
-        itemsCount = imgs.size,
+        itemsCount = images.size,
     ) { idx ->
-        Box(modifier = modifier) {
-            AsyncImage(model = imgs[idx], contentDescription = "image")
-        }
+        AsyncImage(
+            model = images[idx],
+            placeholder = painterResource(id = R.drawable.placeholder),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+            contentDescription = "image",
+        )
     }
 }
 
@@ -72,23 +76,19 @@ fun SlidingCarousel(
 ) {
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
     val coroutineScope = rememberCoroutineScope()
-    val currentPage by remember {
-        derivedStateOf {
-            pagerState.currentPage
-        }
-    }
 
-    var currentPageKey by remember { mutableStateOf(0) }
 
     if (isDragged.not()) {
-        LaunchedEffect(currentPageKey) {
-            launch {
-                delay(autoSlideDuration)
-                val nextPage = (currentPage + 1).mod(pagerState.pageCount)
-                pagerState.animateScrollToPage(page = nextPage)
-                currentPageKey = nextPage
+        //! use pageState.currentPage as key, introduce a bug
+        LaunchedEffect(pagerState.currentPage) {
+            delay(autoSlideDuration)
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(
+                    (pagerState.currentPage + 1) % itemsCount
+                )
             }
         }
+
     }
 
     Box(
@@ -98,8 +98,6 @@ fun SlidingCarousel(
             itemContent(page)
         }
 
-        // you can remove the surface in case you don't want
-        // the transparant bacground
         Surface(
             modifier = Modifier
                 .padding(bottom = 8.dp)
@@ -127,7 +125,7 @@ fun DotsIndicator(
     modifier: Modifier = Modifier,
     totalDots: Int,
     selectedIndex: Int,
-    selectedColor: Color = Color.Yellow,
+    selectedColor: Color = Color.White,
     unSelectedColor: Color = Color.Gray,
     dotSize: Dp,
     onClick: (idx: Int) -> Unit
@@ -166,11 +164,10 @@ fun IndicatorDot(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
-fun previewSlideCarousel() {
-    val imgs = listOf(
+fun PreviewSlideCarousel() {
+    val images = listOf(
         "https://placekitten.com/200/287",
         "https://placekitten.com/201/287",
         "https://placekitten.com/202/287"
@@ -178,17 +175,11 @@ fun previewSlideCarousel() {
 
     Card(
         modifier = Modifier
-            .height(220.dp)
-            .width(200.dp)
+            .height(350.dp)
+            .fillMaxWidth()
             .padding(16.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
-        SlidingCarousel(itemsCount = 3) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(imgs[it]).build(),
-                contentDescription = "image",
-                modifier = Modifier.height(200.dp),
-            )
-        }
+        SlidingCarousel(images)
     }
 }
