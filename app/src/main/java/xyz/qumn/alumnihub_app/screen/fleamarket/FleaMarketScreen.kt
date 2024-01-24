@@ -1,16 +1,18 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -26,18 +28,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import xyz.qumn.alumnihub_app.R
-import xyz.qumn.alumnihub_app.composable.SlidingCarousel
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.Goods
 import java.math.BigDecimal
+import kotlin.random.Random
 
 
 @Composable
 fun FleaMarketFlow() {
     val goods = GoodsApi.page(pageParam(10, 1))
 
-    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-        items(goods) {
-            FleaMarketCard(modifier = Modifier.defaultMinSize(minHeight = 360.dp), goods = it)
+    LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
+        items(goods.size) {
+            FleaMarketCard(
+                modifier = Modifier.defaultMinSize(minHeight = 240.dp),
+                goods = goods[it]
+            )
         }
     }
 }
@@ -46,9 +51,18 @@ fun FleaMarketFlow() {
 fun FleaMarketCard(modifier: Modifier = Modifier, goods: Goods) {
     val titleStyle = MaterialTheme.typography.titleSmall
 
+    val idx = Random.nextInt(goods.imgs.size)
     Card(modifier.padding(3.dp)) {
         Column {
-            SlidingCarousel(goods.imgs, modifier = Modifier.defaultMinSize(120.dp))
+//            SlidingCarousel(goods.imgs, modifier = Modifier.defaultMinSize(121.dp))
+            AsyncImage(
+                model = goods.imgs[idx],
+                placeholder = painterResource(id = R.drawable.placeholder),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentDescription = "image",
+            )
             Column(
                 Modifier
                     .size(96.dp)
@@ -136,4 +150,16 @@ fun FleaMarketCardPreview() {
 @Composable
 fun FleaMarketFlowPreview() {
     FleaMarketFlow()
+}
+
+@Preview
+@Composable
+fun RespactRatio() {
+    Image(
+        painter = painterResource(id = R.drawable.placeholder),
+        contentDescription = null,
+        modifier = Modifier
+            .width(20.dp)
+            .aspectRatio(1F)
+    )
 }

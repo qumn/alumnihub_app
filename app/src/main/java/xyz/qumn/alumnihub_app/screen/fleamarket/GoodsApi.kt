@@ -15,9 +15,9 @@ object GoodsApi {
             goods.add(Goods(
                 name = "GTX 1060Ti",
                 imgs = listOf(
-                    "https://placekitten.com/200/287",
-                    "https://placekitten.com/201/287",
-                    "https://placekitten.com/202/287"
+                    "https://placehold.co/600x400/000000/FFFFFF/png",
+                    "https://placehold.co/300x600/000000/FFFFFF/png",
+                    "https://placehold.co/500x400/000000/FFFFFF/png"
                 ),
                 price = BigDecimal.valueOf(99.99),
                 sellerId = 1

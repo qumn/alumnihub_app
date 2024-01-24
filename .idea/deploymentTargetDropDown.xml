@@ -5,16 +5,10 @@
       <entry key="FleaMarketCardPreview">
         <State />
       </entry>
-      <entry key="FleaMarketFlowPreview">
-        <State />
-      </entry>
-      <entry key="PreviewSlideCarousel">
-        <State />
-      </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="previewSlideCarousel">
+      <entry key="fleaMarketCardPreview">
         <State />
       </entry>
     </value>
