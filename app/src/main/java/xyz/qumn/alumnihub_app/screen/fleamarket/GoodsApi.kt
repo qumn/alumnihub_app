@@ -1,6 +1,9 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket;
 
-import xyz.qumn.alumnihub_app.screen.fleamarket.module.Goods
+import xyz.qumn.alumnihub_app.module.Gender
+import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsDetail
+import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsOverview
 import java.math.BigDecimal
 import kotlin.random.Random
 
@@ -10,11 +13,11 @@ data class pageParam(
 )
 
 object GoodsApi {
-    fun page(pageParam: pageParam): List<Goods> {
-        val goods = mutableListOf<Goods>()
+    fun page(pageParam: pageParam): List<GoodsOverview> {
+        val goods = mutableListOf<GoodsOverview>()
         for (i in 1..pageParam.pageSize) {
             goods.add(
-                Goods(
+                GoodsOverview(
                     name = "GTX 1060Ti",
                     cover = randomCover(),
                     price = BigDecimal.valueOf(99.99),
@@ -25,6 +28,28 @@ object GoodsApi {
             )
         }
         return goods
+    }
+
+    fun get(id: Long): GoodsDetail {
+        return GoodsDetail(
+            "name",
+            desc = "desc desc desc desc desc desc desc desc desc desc desc desc desc desc ",
+            listOf(
+                "https://picsum.photos/200/300",
+                "https://picsum.photos/200/300",
+                "https://picsum.photos/200/300"
+            ),
+            100.toBigDecimal(),
+            User(
+                1L,
+                "name",
+                avatar = "https://picsum.photos/201/300",
+                Gender.UNKNOWN,
+                null,
+                "",
+                ""
+            )
+        )
     }
 }
 

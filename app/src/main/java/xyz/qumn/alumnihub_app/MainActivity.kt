@@ -40,7 +40,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import xyz.qumn.alumnihub_app.composable.LocalSnackHostState
 import xyz.qumn.alumnihub_app.composable.useSnackbar
 import xyz.qumn.alumnihub_app.screen.fleamarket.FleaMarketFlow
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
@@ -80,10 +79,12 @@ fun TransparentSystemBars() {
 @Composable
 fun AlumnihubApp() {
     val navController = rememberNavController()
-
     val snackbarHostState = SnackbarHostState()
 
-    CompositionLocalProvider(LocalSnackHostState provides snackbarHostState) {
+    CompositionLocalProvider(
+        AppState.LocalSnackHostState provides snackbarHostState,
+        AppState.LocalNavController provides navController
+    ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = { AluBottomBar(navController) },
