@@ -4,8 +4,10 @@ import java.math.BigDecimal
 
 data class Goods(
     val name: String,
-    val imgs: List<String>,
+    val cover: String,
     val price: BigDecimal,
 
-    val sellerId: Long
+    val sellerId: Long,
+    val sellerAvatar: String,
+    val sellerName: String,
 )

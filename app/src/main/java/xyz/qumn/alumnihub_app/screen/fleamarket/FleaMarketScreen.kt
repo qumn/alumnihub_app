@@ -4,8 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,6 @@ import coil.compose.AsyncImage
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.Goods
 import java.math.BigDecimal
-import kotlin.random.Random
 
 
 @Composable
@@ -40,7 +40,6 @@ fun FleaMarketFlow() {
     LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
         items(goods.size) {
             FleaMarketCard(
-                modifier = Modifier.defaultMinSize(minHeight = 240.dp),
                 goods = goods[it]
             )
         }
@@ -49,39 +48,32 @@ fun FleaMarketFlow() {
 
 @Composable
 fun FleaMarketCard(modifier: Modifier = Modifier, goods: Goods) {
-    val titleStyle = MaterialTheme.typography.titleSmall
+    val titleStyle = MaterialTheme.typography.titleMedium
 
-    val idx = Random.nextInt(goods.imgs.size)
     Card(modifier.padding(3.dp)) {
-        Column {
-//            SlidingCarousel(goods.imgs, modifier = Modifier.defaultMinSize(121.dp))
+        Column(Modifier.fillMaxWidth()) {
             AsyncImage(
-                model = goods.imgs[idx],
+                model = goods.cover,
+                contentDescription = "cover image",
                 placeholder = painterResource(id = R.drawable.placeholder),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
+                    .fillMaxHeight(0.7f)
                     .fillMaxWidth(),
-                contentDescription = "image",
             )
             Column(
                 Modifier
-                    .size(96.dp)
+                    .fillMaxWidth()
                     .padding(8.dp, 6.dp),
-                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = goods.name, style = titleStyle)
-                PriceTag(price = goods.price)
+                Spacer(Modifier.height(4.dp))
                 Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    SellerAvatar(
-                        avatarUrl = "https://placekitten.com/200/287",
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape),
-                    )
-                    SellerName(name = "Seller")
+                    PriceInfo(price = goods.price)
+                    SellerInfo(goods.sellerAvatar, goods.sellerName)
                 }
             }
         }
@@ -89,21 +81,41 @@ fun FleaMarketCard(modifier: Modifier = Modifier, goods: Goods) {
 }
 
 @Composable
-fun PriceTag(
+fun PriceInfo(
     modifier: Modifier = Modifier,
     price: BigDecimal,
     accentColor: Color = Color(255, 165, 0),
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
+    Row(modifier = modifier) {
         Text(
-            text = "¥",
-            style = MaterialTheme.typography.titleSmall,
+            "¥",
+            Modifier.alignByBaseline(),
+            style = MaterialTheme.typography.titleMedium,
             color = accentColor,
         )
+        Spacer(modifier = Modifier.width(1.dp))
         Text(
-            text = price.toString(),
-            style = MaterialTheme.typography.titleMedium,
+            price.toString(),
+            Modifier.alignByBaseline(),
+            style = MaterialTheme.typography.titleLarge,
             color = accentColor
+        )
+    }
+}
+
+@Composable
+private fun SellerInfo(avatar: String, name: String) {
+    Row(verticalAlignment = Alignment.Bottom) {
+        SellerAvatar(
+            avatarUrl = avatar,
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape),
+        )
+        Spacer(modifier = Modifier.width(3.dp))
+        Text(
+            name,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -112,16 +124,11 @@ fun PriceTag(
 fun SellerAvatar(avatarUrl: String, modifier: Modifier = Modifier) {
     AsyncImage(
         model = avatarUrl,
+        modifier = modifier,
         placeholder = painterResource(id = R.drawable.placeholder),
         contentScale = ContentScale.Crop,
-        modifier = modifier,
         contentDescription = "seller avatar"
     )
-}
-
-@Composable
-fun SellerName(name: String, modifier: Modifier = Modifier) {
-    Text(text = name, style = MaterialTheme.typography.bodyMedium, modifier = modifier)
 }
 
 
@@ -130,18 +137,15 @@ fun SellerName(name: String, modifier: Modifier = Modifier) {
 fun FleaMarketCardPreview() {
     FleaMarketCard(
         modifier = Modifier
-            .width(200.dp)
-            .height(300.dp)
+            .width(240.dp)
             .padding(8.dp),
         goods = Goods(
             name = "GTX 1060Ti",
-            imgs = listOf(
-                "https://placekitten.com/200/287",
-                "https://placekitten.com/201/287",
-                "https://placekitten.com/202/287"
-            ),
+            cover = "https://placekitten.com/200/287",
             price = BigDecimal.valueOf(99.99),
-            sellerId = 1
+            sellerId = 1,
+            sellerAvatar = "https://placekitten.com/201/287",
+            sellerName = "张三"
         )
     )
 }
