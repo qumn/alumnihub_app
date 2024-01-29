@@ -4,6 +4,7 @@ import xyz.qumn.alumnihub_app.module.User
 import java.math.BigDecimal
 
 data class GoodsOverview(
+    val id: Long,
     val name: String,
     val cover: String,
     val price: BigDecimal,

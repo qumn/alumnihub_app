@@ -18,6 +18,7 @@ object GoodsApi {
         for (i in 1..pageParam.pageSize) {
             goods.add(
                 GoodsOverview(
+                    id = 1,
                     name = "GTX 1060Ti",
                     cover = randomCover(),
                     price = BigDecimal.valueOf(99.99),

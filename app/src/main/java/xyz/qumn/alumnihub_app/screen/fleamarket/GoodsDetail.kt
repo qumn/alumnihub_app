@@ -33,14 +33,14 @@ import xyz.qumn.alumnihub_app.composable.SlidingCarousel
 import xyz.qumn.alumnihub_app.module.User
 
 @Composable
-fun TradeDetailScreen(tradeId: Long?) {
+fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit) {
     val goods = GoodsApi.get(tradeId!!)
 
     val titleStyle = MaterialTheme.typography.titleLarge
 
     Scaffold(
         topBar = {
-            TopBar(title = "商品详情", onClick = { })
+            TopBar(title = "商品详情", onClickBack)
         },
         bottomBar = {
             BottomBar()
@@ -84,11 +84,11 @@ fun SellerInfo(seller: User) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(title: String, onClick: () -> Unit) {
+fun TopBar(title: String, onClickBack: () -> Unit) {
     TopAppBar(
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
         navigationIcon = {
-            IconButton(onClick = onClick) {
+            IconButton(onClick = onClickBack) {
                 Icon(Icons.Filled.ArrowBackIosNew, null)
             }
         }
@@ -120,5 +120,5 @@ fun BottomBar() {
 @Preview
 @Composable
 fun GoodsDetailPreview() {
-    TradeDetailScreen(1L)
+    TradeDetailScreen(1L) {}
 }

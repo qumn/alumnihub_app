@@ -1,6 +1,7 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,20 +32,21 @@ import java.math.BigDecimal
 
 
 @Composable
-fun FleaMarketFlow() {
+fun FleaMarketFlowScreen(onClickTradeCard: (tradeId: Long) -> Unit) {
     val goods = GoodsApi.page(pageParam(10, 1))
 
     LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
         items(goods.size) {
             FleaMarketCard(
-                goods = goods[it]
+                goods = goods[it],
+                onClickTradeCard = onClickTradeCard
             )
         }
     }
 }
 
 @Composable
-fun FleaMarketCard(modifier: Modifier = Modifier, goods: GoodsOverview) {
+fun FleaMarketCard(modifier: Modifier = Modifier, goods: GoodsOverview, onClickTradeCard: (tradeId: Long) -> Unit) {
     val titleStyle = MaterialTheme.typography.titleMedium
 
     Card(modifier.padding(3.dp)) {
@@ -56,7 +58,8 @@ fun FleaMarketCard(modifier: Modifier = Modifier, goods: GoodsOverview) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxHeight(0.7f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable { onClickTradeCard(goods.id) },
             )
             Column(
                 Modifier
@@ -103,20 +106,22 @@ fun FleaMarketCardPreview() {
             .width(240.dp)
             .padding(8.dp),
         goods = GoodsOverview(
+            id = 1,
             name = "GTX 1060Ti",
             cover = "https://placekitten.com/200/287",
             price = BigDecimal.valueOf(99.99),
             sellerId = 1,
             sellerAvatar = "https://placekitten.com/201/287",
             sellerName = "张三"
-        )
+        ),
+        onClickTradeCard = {}
     )
 }
 
 @Preview
 @Composable
 fun FleaMarketFlowPreview() {
-    FleaMarketFlow()
+    FleaMarketFlowScreen {}
 }
 
 @Preview

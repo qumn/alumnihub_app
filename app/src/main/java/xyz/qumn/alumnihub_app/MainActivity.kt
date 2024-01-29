@@ -36,12 +36,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import xyz.qumn.alumnihub_app.composable.useSnackbar
-import xyz.qumn.alumnihub_app.screen.fleamarket.FleaMarketFlow
+import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -104,9 +103,10 @@ fun AlumnihubApp() {
                             targetOffsetX = { fullWidth -> -fullWidth })
                     }
                 ) {
-                    composable(Screen.Profile.route) { Profile() }
-                    composable(Screen.FleaMarket.route) { FleaMarketFlow() }
-                    composable(Screen.LostFound.route) { LostFound() }
+                    fleaMarket(navController)
+//                    composable(Screen.Profile.route) { Profile() }
+//                    composable(Screen.FleaMarket.route) { FleaMarketFlowScreen() }
+//                    composable(Screen.LostFound.route) { LostFound() }
                 }
             }
         }
