@@ -10,4 +10,7 @@ data class Post(
     val content: String,
     val createdAt: LocalDateTime,
     val tags: List<String>,
+    val thumbUpCount: Int,
+    val commentCount: Int,
+    val shareCount: Int,
 )
