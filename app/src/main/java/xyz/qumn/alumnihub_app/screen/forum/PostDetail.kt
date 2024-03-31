@@ -1,0 +1,274 @@
+package xyz.qumn.alumnihub_app.screen.forum
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import xyz.qumn.alumnihub_app.R
+import xyz.qumn.alumnihub_app.composable.Avatar
+import xyz.qumn.alumnihub_app.module.Gender
+import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.screen.forum.module.Comment
+import xyz.qumn.alumnihub_app.screen.forum.module.Post
+import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
+import xyz.qumn.alumnihub_app.screen.forum.module.getById
+import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
+import xyz.qumn.alumnihub_app.ui.theme.Blue90
+import xyz.qumn.alumnihub_app.ui.theme.Gray60
+import xyz.qumn.alumnihub_app.util.toViewFormat
+import java.time.LocalDateTime
+
+
+@Composable
+fun PostDetailScreen(pid: Long?, onClickBack: () -> Unit) {
+    // get the post
+    val titleStyle = MaterialTheme.typography.titleMedium
+    val post = PostApi.getById(pid!!)
+    Scaffold(
+        topBar = { TopBar(title = post.title, onClickBack) }
+    ) {
+        LazyColumn(Modifier.padding(it)) {
+            item {
+                Text(post.title, style = titleStyle)
+            }
+            item {
+                CreatorInfo(post = post)
+            }
+            item {
+                Text(text = post.content)
+            }
+            items(post.imgs) { img ->
+                Image(img)
+            }
+            item {
+                CommentView(comments = post.comments)
+            }
+        }
+    }
+
+}
+
+@Composable
+fun CreatorInfo(post: Post) {
+    val nameStyle = MaterialTheme.typography.titleSmall
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Avatar(
+            url = post.creatorAvatar,
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = "by")
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = post.creatorName, style = nameStyle)
+    }
+}
+
+@Composable
+private fun Image(img: String, padding: Int = 3) {
+    val modifier = Modifier.padding(padding.dp)
+    AsyncImage(
+        model = img,
+        modifier = modifier,
+        placeholder = painterResource(id = R.drawable.placeholder),
+        contentDescription = "image"
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(title: String, onClickBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Title(title)
+        },
+        navigationIcon = {
+            IconButton(onClick = onClickBack) {
+                Icon(Icons.Filled.ArrowBackIosNew, null)
+            }
+        }
+    )
+}
+
+@Composable
+fun Title(str: String) {
+    Text(
+        str,
+        style = MaterialTheme.typography.titleLarge,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+fun CommentView(comments: List<Comment>) {
+    for (comment in comments) {
+        CommentItem(comment = comment)
+    }
+}
+
+@Composable
+fun CommentItem(comment: Comment, avatarSize: Int = 42, th: Int = -1) {
+    var expand by remember { mutableStateOf(false) }
+    val flatReplays = comment.flatReplay().sortedBy { it.createAt }
+
+    CommentView(comment, 42) {
+        Replays(replays = flatReplays, expand) {
+            expand = true
+        }
+    }
+}
+
+@Composable
+fun Replays(replays: List<Comment>, expand: Boolean = false, onclick: () -> Unit) {
+    val showMoreStyle = MaterialTheme.typography.labelMedium.copy(color = Blue90)
+    val displayReplays = if (!expand) {
+        replays.take(1)
+    } else {
+        replays
+    }
+    val modifier = Modifier.padding(0.dp, 2.dp, 0.dp, 0.dp)
+    Column(modifier) {
+        for (replay in displayReplays) {
+            CommentView(comment = replay, avatarSize = 24)
+        }
+    }
+    if (!expand && replays.size > 1) {
+        Text(
+            text = "展开 ${replays.size - 1} 条回复",
+            Modifier.clickable { onclick() },
+            style = showMoreStyle
+        )
+    }
+}
+
+@Composable
+fun CommentView(
+    comment: Comment,
+    avatarSize: Int = 42,
+    indentComponent: @Composable () -> Unit = {}
+) {
+    val commenter = comment.commenter
+    val nameStyle = MaterialTheme.typography.titleMedium.copy(
+        color = Gray60
+    )
+    val timeStyle = MaterialTheme.typography.titleMedium.copy(
+        color = Gray60
+    )
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Avatar(
+            url = commenter.avatar, modifier = Modifier
+                .size(avatarSize.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Column {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 0.dp, 10.dp, 0.dp)
+            ) {
+                Row {
+                    Text(text = commenter.name, style = nameStyle)
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(text = "\u00B7", style = timeStyle)
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(text = comment.createAt.toViewFormat(), style = timeStyle)
+                }
+                IconTextButton(
+                    Modifier.size(14.dp),
+                    Icons.Outlined.ThumbUp,
+                    "${comment.thumpUpCount}",
+                    onClick = { })
+            }
+            Row {
+                if (comment.parent != null) {
+                    Text("回复 ")
+                    Text(comment.parent.commenter.name, style = nameStyle)
+                    Text(text = " : ")
+                }
+                Text(text = comment.content)
+            }
+            indentComponent()
+        }
+    }
+
+}
+
+@Composable
+//@Preview
+fun CommentItemPreview() {
+    val user = User(
+        1L,
+        "张三",
+        avatar = "https://picsum.photos/201/300",
+        Gender.UNKNOWN,
+        null,
+        "",
+        ""
+    )
+    var comment = Comment(
+        1L,
+        1L,
+        "这是一条评论",
+        commenter = user,
+        createAt = LocalDateTime.now(),
+        replays = listOf(),
+        thumpUpCount = 3
+    )
+    val yeasDay = LocalDateTime.now().minusDays(1)
+    val replay1 = comment.copy(replays = listOf(comment.copy(createAt = yeasDay), comment.copy()))
+
+    comment = comment.copy(replays = listOf(replay1, comment.copy(), comment.copy()))
+
+    Alumnihub_appTheme {
+        Card {
+            CommentItem(comment)
+        }
+    }
+}
+
+
+@Composable
+@Preview
+fun postDetailPrevie() {
+    PostDetailScreen(pid = 1) {
+    }
+}

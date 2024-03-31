@@ -2,18 +2,19 @@ package xyz.qumn.alumnihub_app.screen.fleamarket;
 
 import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.req.PageParam
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsDetail
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsOverview
 import java.math.BigDecimal
 import kotlin.random.Random
 
-data class pageParam(
-    val pageSize: Int,
-    val pageNum: Int,
-)
+data class GoodsPageParam(
+    override var pageSize: Int = 10,
+    override var lastId: Long = 0
+) : PageParam
 
 object GoodsApi {
-    fun page(pageParam: pageParam): List<GoodsOverview> {
+    fun page(pageParam: GoodsPageParam): List<GoodsOverview> {
         val goods = mutableListOf<GoodsOverview>()
         for (i in 1..pageParam.pageSize) {
             goods.add(

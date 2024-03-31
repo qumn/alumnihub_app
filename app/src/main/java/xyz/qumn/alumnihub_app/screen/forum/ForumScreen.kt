@@ -1,5 +1,6 @@
 package xyz.qumn.alumnihub_app.screen.forum
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,22 +38,34 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import xyz.qumn.alumnihub_app.composable.Avatar
+import xyz.qumn.alumnihub_app.composable.ImgGrid
 import xyz.qumn.alumnihub_app.screen.forum.module.Post
+import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
+import xyz.qumn.alumnihub_app.screen.forum.module.PostPageParam
+import xyz.qumn.alumnihub_app.screen.forum.module.page
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.util.toViewFormat
 import java.time.LocalDateTime
 
 @Composable
-fun ForumScreen() {
-
+fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
+    val postPage = PostApi.page(PostPageParam())
+    Column {
+        for (post in postPage.list) {
+            Log.d("post", post.toString())
+            PostItem(Modifier.padding(4.dp, 2.dp), post = post) {
+                onClickPostCard(post.id)
+            }
+        }
+    }
 }
 
 @Composable
-fun PostItem(modifier: Modifier = Modifier, post: Post) {
+fun PostItem(modifier: Modifier = Modifier, post: Post, onClick: () -> Unit) {
     val titleStyle = MaterialTheme.typography.titleMedium
     val contentStyle = MaterialTheme.typography.bodyMedium
 
-    Card(modifier.background(Color.White)) {
+    Card(modifier.clickable { onClick() }) {
         Column(Modifier.padding(6.dp, 4.dp)) {
             PostItemHeader(post)
             Text(
@@ -67,6 +80,7 @@ fun PostItem(modifier: Modifier = Modifier, post: Post) {
                 maxLines = 6,
                 overflow = TextOverflow.Ellipsis
             )
+            ImgGrid(imgs = post.imgs)
             Spacer(modifier = Modifier.height(4.dp))
             PostItemTags(post.tags)
             Spacer(modifier = Modifier.height(4.dp))
@@ -101,18 +115,7 @@ fun PostItemTags(tags: List<String>) {
 
     Row {
         for (tag in tags) {
-            Surface(
-                color = MaterialTheme.colorScheme.secondary,
-                shape = RoundedCornerShape(6.dp),
-                shadowElevation = 2.dp
-            ) {
-                Text(
-                    text = tag,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    style = tagStyle,
-                    modifier = Modifier.padding(3.dp)
-                )
-            }
+            Text("#${tag}", style = tagStyle)
             Spacer(modifier = Modifier.width(2.dp))
         }
     }
@@ -131,7 +134,7 @@ fun PostItemFooter(post: Post) {
 }
 
 @Composable
-private fun IconTextButton(
+fun IconTextButton(
     modifier: Modifier,
     icon: ImageVector,
     text: String,
@@ -149,7 +152,9 @@ private fun IconTextButton(
 @Preview
 @Composable
 fun ForumScreenPreview() {
-    ForumScreen()
+    Alumnihub_appTheme {
+        ForumScreen(){}
+    }
 }
 
 @Preview
@@ -157,12 +162,20 @@ fun ForumScreenPreview() {
 fun PostItemPreview() {
     val post = Post(
         1,
+        1,
         "张三",
         "https://placekitten.com/201/287",
         "锚定发展目标 明晰落实举措 展现更大作为——学校干部职工谈落实春季干部大会精神",
         "When naming variables in your code, it's best to be descriptive and precise about what the variable represents. For example, thumbUps or likeCount could both represent the number of thumbs-up or likes that a post or comment has received. Here",
         LocalDateTime.now(),
         tags = listOf("键盘", "科技"),
+        imgs = listOf(
+            "https://placekitten.com/201/287",
+            "https://placekitten.com/201/287",
+            "https://placekitten.com/201/287",
+            "https://placekitten.com/201/287",
+            "https://placekitten.com/201/287",
+        ),
         thumbUpCount = 302,
         commentCount = 64,
         shareCount = 22,
@@ -172,7 +185,7 @@ fun PostItemPreview() {
             Modifier
                 .background(Color.Cyan)
                 .width(200.dp), post
-        )
+        ) {}
     }
 }
 

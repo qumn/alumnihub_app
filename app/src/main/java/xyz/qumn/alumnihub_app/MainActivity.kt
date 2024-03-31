@@ -41,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import xyz.qumn.alumnihub_app.composable.useSnackbar
 import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
+import xyz.qumn.alumnihub_app.screen.forum.forum
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -104,6 +105,7 @@ fun AlumnihubApp() {
                     }
                 ) {
                     fleaMarket(navController)
+                    forum(navController)
 //                    composable(Screen.Profile.route) { Profile() }
 //                    composable(Screen.FleaMarket.route) { FleaMarketFlowScreen() }
 //                    composable(Screen.LostFound.route) { LostFound() }
@@ -128,7 +130,7 @@ sealed class Screen(
         )
 
     object LostFound :
-        Screen("/lost_found", "失物招领", { Icon(Icons.Filled.Flag, "失物招领") }, true)
+        Screen("/forum", "失物招领", { Icon(Icons.Filled.Flag, "失物招领") }, true)
 
     object Profile :
         Screen("/profile", "个人中心", { Icon(Icons.Filled.Person, "个人中心") }, true)

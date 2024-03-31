@@ -27,13 +27,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.composable.Avatar
+import xyz.qumn.alumnihub_app.req.PageParam
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsOverview
 import java.math.BigDecimal
 
 
 @Composable
 fun FleaMarketFlowScreen(onClickTradeCard: (tradeId: Long) -> Unit) {
-    val goods = GoodsApi.page(pageParam(10, 1))
+    val goods = GoodsApi.page(GoodsPageParam())
 
     LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
         items(goods.size) {
