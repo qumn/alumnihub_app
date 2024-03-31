@@ -14,12 +14,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.AddComment
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -31,10 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import coil.compose.AsyncImage
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.composable.Avatar
@@ -57,7 +64,8 @@ fun PostDetailScreen(pid: Long?, onClickBack: () -> Unit) {
     val titleStyle = MaterialTheme.typography.titleMedium
     val post = PostApi.getById(pid!!)
     Scaffold(
-        topBar = { TopBar(title = post.title, onClickBack) }
+        topBar = { TopBar(title = post.title, onClickBack) },
+        bottomBar = { BottomBar() }
     ) {
         LazyColumn(Modifier.padding(it)) {
             item {
@@ -123,6 +131,46 @@ fun TopBar(title: String, onClickBack: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+fun BottomBar() {
+    var comment by remember { mutableStateOf("") }
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(4f),
+            value = comment,
+            onValueChange = { comment = it },
+            placeholder = {
+                Row {
+                    Icon(Icons.Outlined.Edit, contentDescription = "")
+                    Text(text = "写点什么")
+                }
+            }
+        )
+
+        val modifier = Modifier.weight(2f)
+        IconText(modifier, icon = Icons.Outlined.ThumbUp, "20")
+        IconText(modifier, icon = Icons.Outlined.Star, "2")
+        IconText(modifier, icon = Icons.Outlined.AddComment, "19")
+    }
+}
+
+@Composable
+private fun IconText(modifier: Modifier, icon: ImageVector, text: String) {
+    val textStyle = MaterialTheme.typography.titleMedium
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+    ) {
+        Icon(icon, modifier = Modifier.size(32.dp), contentDescription = null)
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(text, style = textStyle)
+    }
 }
 
 @Composable

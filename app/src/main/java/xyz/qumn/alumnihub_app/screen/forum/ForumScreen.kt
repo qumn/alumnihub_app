@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.Share
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -135,15 +133,15 @@ fun PostItemFooter(post: Post) {
 
 @Composable
 fun IconTextButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     icon: ImageVector,
     text: String,
     onClick: () -> Unit = { }
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onClick() }) {
-        Icon(icon, contentDescription = null, modifier)
+        modifier = modifier.clickable { onClick() }) {
+        Icon(icon, contentDescription = null)
         Spacer(modifier = Modifier.width(2.dp))
         Text(text, fontSize = 2.em)
     }
@@ -153,7 +151,7 @@ fun IconTextButton(
 @Composable
 fun ForumScreenPreview() {
     Alumnihub_appTheme {
-        ForumScreen(){}
+        ForumScreen() {}
     }
 }
 
