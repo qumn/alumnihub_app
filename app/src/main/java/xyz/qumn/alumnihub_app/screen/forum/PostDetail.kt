@@ -261,7 +261,7 @@ fun CommentView(
                     Text(text = comment.createAt.toViewFormat(), style = timeStyle)
                 }
                 IconTextButton(
-                    Modifier.size(14.dp),
+//                    Modifier.size(14.dp),
                     Icons.Outlined.ThumbUp,
                     "${comment.thumpUpCount}",
                     onClick = { })

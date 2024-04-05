@@ -1,30 +1,31 @@
 package xyz.qumn.alumnihub_app.composable
 
-import androidx.compose.foundation.border
+import android.util.Log
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import io.woong.compose.grid.SimpleGridCells
+import io.woong.compose.grid.VerticalGrid
 import xyz.qumn.alumnihub_app.R
 
 @Composable
-fun ImgGrid(imgs: List<String>, cols: Int = 3, rows: Int = 3) {
+fun ImgGrid(imgs: List<String>, maxCols: Int = 3) {
     if (imgs.isEmpty()) return
-
-    val availableImgs = imgs.take(cols * rows)
-    LazyVerticalGrid(columns = GridCells.Fixed(cols)) {
-        val modifier = Modifier.padding(2.dp)
-        items(availableImgs) { imgUrl ->
+    val cols = minOf(imgs.size, maxCols)
+    VerticalGrid(columns = SimpleGridCells.Fixed(cols), Modifier.fillMaxWidth()) {
+        for (img in imgs) {
+            Log.i("ImgGrid", "ImgGrid: $img")
+            val modifier = Modifier.padding(2.dp)
             AsyncImage(
-                model = imgUrl,
+                model = img,
                 modifier = modifier,
+                contentDescription = "image",
                 placeholder = painterResource(id = R.drawable.placeholder),
-                contentDescription = "image"
+                error = painterResource(id = R.drawable.placeholder),
             )
         }
     }

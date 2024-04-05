@@ -19,8 +19,9 @@ fun Avatar(
     AsyncImage(
         model = url,
         modifier = modifier,
-        placeholder = painterResource(id = R.drawable.placeholder),
         contentScale = ContentScale.Crop,
-        contentDescription = "seller avatar"
+        contentDescription = "seller avatar",
+        placeholder = painterResource(id = R.drawable.placeholder),
+        error = painterResource(id = R.drawable.placeholder),
     )
 }

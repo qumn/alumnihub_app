@@ -28,7 +28,10 @@ fun PostApi.page(postPageParam: PostPageParam): PageRst<Post> {
                 tags = listOf("tag1", "tag2"),
                 thumbUpCount = 10,
                 commentCount = 5,
-                shareCount = 2
+                shareCount = 2,
+                imgs = listOf(
+                    "https://picsum.photos/200/300",
+                ),
             ),
             Post(
                 id = 2,
@@ -41,7 +44,12 @@ fun PostApi.page(postPageParam: PostPageParam): PageRst<Post> {
                 tags = listOf("tag3", "tag4"),
                 thumbUpCount = 20,
                 commentCount = 10,
-                shareCount = 4
+                shareCount = 4,
+                imgs = listOf(
+                    "https://picsum.photos/200/300",
+                    "https://picsum.photos/300/300",
+                    "https://picsum.photos/400/300",
+                ),
             ),
             Post(
                 id = 3,
@@ -54,7 +62,13 @@ fun PostApi.page(postPageParam: PostPageParam): PageRst<Post> {
                 tags = listOf("tag5", "tag6"),
                 thumbUpCount = 30,
                 commentCount = 15,
-                shareCount = 6
+                shareCount = 6,
+                imgs = listOf(
+                    "https://picsum.photos/200/300",
+                    "https://picsum.photos/300/300",
+                    "https://picsum.photos/400/300",
+                    "https://picsum.photos/400/400",
+                ),
             )
         )
     )
@@ -83,7 +97,7 @@ fun PostApi.getById(id: Long): Post {
     )
 }
 
-fun PostApi.getComments(pid: Long) : List<Comment> {
+fun PostApi.getComments(pid: Long): List<Comment> {
     val user = User(
         1L,
         "张三",

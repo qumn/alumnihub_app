@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Message
-import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.FirstBaseline
@@ -42,18 +46,31 @@ import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
 import xyz.qumn.alumnihub_app.screen.forum.module.PostPageParam
 import xyz.qumn.alumnihub_app.screen.forum.module.page
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
+import xyz.qumn.alumnihub_app.ui.theme.Blue80
+import xyz.qumn.alumnihub_app.ui.theme.Gray20
+import xyz.qumn.alumnihub_app.ui.theme.Gray50
+import xyz.qumn.alumnihub_app.ui.theme.Gray80
 import xyz.qumn.alumnihub_app.util.toViewFormat
 import java.time.LocalDateTime
 
 @Composable
 fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
     val postPage = PostApi.page(PostPageParam())
-    Column {
-        for (post in postPage.list) {
+    LazyColumn(Modifier.background(Color.White)) {
+        items(postPage.list.size) { idx ->
+            val post = postPage.list[idx]
             Log.d("post", post.toString())
-            PostItem(Modifier.padding(4.dp, 2.dp), post = post) {
+            PostItem(Modifier, post = post) {
                 onClickPostCard(post.id)
             }
+            if (idx != postPage.list.size - 1) { // not last, draw a divider
+                Divider(
+                    color = Gray50,
+                    thickness = 1.6.dp,
+                    modifier = Modifier.padding(20.dp, 3.dp)
+                )
+            }
+
         }
     }
 }
@@ -63,7 +80,10 @@ fun PostItem(modifier: Modifier = Modifier, post: Post, onClick: () -> Unit) {
     val titleStyle = MaterialTheme.typography.titleMedium
     val contentStyle = MaterialTheme.typography.bodyMedium
 
-    Card(modifier.clickable { onClick() }) {
+    Card(
+        modifier = modifier.clickable { onClick() },
+        shape = RectangleShape,
+    ) {
         Column(Modifier.padding(6.dp, 4.dp)) {
             PostItemHeader(post)
             Text(
@@ -99,7 +119,7 @@ fun PostItemHeader(post: Post) {
                 .size(32.dp)
                 .clip(CircleShape)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Column(verticalArrangement = Arrangement.SpaceEvenly) {
             Text(text = post.creatorName, style = nameStyle)
             Text(text = post.createdAt.toViewFormat(), style = timeStyle)
@@ -122,28 +142,43 @@ fun PostItemTags(tags: List<String>) {
 
 @Composable
 fun PostItemFooter(post: Post) {
-    val modifier = Modifier.size(12.dp)
+//    val modifier = Modifier.size(12.dp)
+    val size = 13
 
-    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-        IconTextButton(modifier, Icons.Outlined.ThumbUp, "${post.thumbUpCount}", onClick = { })
-        IconTextButton(modifier, Icons.Outlined.Message, "${post.commentCount}", onClick = { })
-        IconTextButton(modifier, Icons.Outlined.Share, "${post.shareCount}", onClick = { })
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+        Row {
+            IconTextButton(
+                Icons.Outlined.ThumbUp,
+                "${post.thumbUpCount}",
+                background = Gray20,
+                onClick = { })
+            IconTextButton(Icons.Outlined.Forum, "${post.commentCount} 条评论", onClick = { })
+        }
+        IconTextButton(Icons.Outlined.MoreHoriz, onClick = { })
     }
 }
 
 @Composable
 fun IconTextButton(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
-    text: String,
+    text: String = "",
+    background: Color = Color.Transparent,
+    clicked: Boolean = false,
     onClick: () -> Unit = { }
 ) {
+    val color = if (clicked) Blue80 else Gray80
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { onClick() }) {
-        Icon(icon, contentDescription = null)
+        modifier = Modifier
+            .padding(4.dp, 0.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(background)
+            .padding(4.dp, 1.dp)
+            .clickable { onClick() }
+    ) {
+        Icon(icon, contentDescription = null, Modifier.size(15.dp), tint = color)
         Spacer(modifier = Modifier.width(2.dp))
-        Text(text, fontSize = 2.em)
+        Text(text, fontSize = 2.4.em, color = color)
     }
 }
 
