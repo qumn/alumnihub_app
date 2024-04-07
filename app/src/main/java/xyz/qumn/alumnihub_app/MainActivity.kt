@@ -2,6 +2,7 @@ package xyz.qumn.alumnihub_app
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.tween
@@ -101,14 +102,11 @@ fun AlumnihubApp() {
                     exitTransition = {
                         slideOutHorizontally(
                             animationSpec = tween(300),
-                            targetOffsetX = { fullWidth -> -fullWidth })
+                            targetOffsetX = { fullWidth -> 2 * fullWidth })
                     }
                 ) {
                     fleaMarket(navController)
                     forum(navController)
-//                    composable(Screen.Profile.route) { Profile() }
-//                    composable(Screen.FleaMarket.route) { FleaMarketFlowScreen() }
-//                    composable(Screen.LostFound.route) { LostFound() }
                 }
             }
         }
@@ -142,22 +140,28 @@ private fun AluBottomBar(navController: NavHostController) {
     val screens = listOf(Screen.FleaMarket, Screen.LostFound, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    Log.d("nav", "AluBottomBar: ${navBackStackEntry?.arguments}")
+    val showBottom = !(navBackStackEntry?.arguments?.containsKey("showBottom") ?: false) // to show if not contains the showBottom  argument
+            || navBackStackEntry?.arguments?.getBoolean("showBottom")!! // use the argument, if contains
 
     val to = { screen: Screen ->
         navController.navigate(screen.route) {
-            popUpTo(navController.graph.startDestinationId)
+            popUpTo(navController.graph.startDestinationId){
+                saveState = true
+            }
             launchSingleTop = true
+            restoreState = true
         }
     }
-
-    NavigationBar(containerColor = Color.White) {
-        for (screen in screens) {
-            NavigationBarItem(
-                selected = false,
-                onClick = { to(screen) },
-                icon = screen.icon
-            )
+    if (showBottom) {
+        NavigationBar(containerColor = Color.White) {
+            for (screen in screens) {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { to(screen) },
+                    icon = screen.icon
+                )
+            }
         }
     }
 }
