@@ -13,7 +13,7 @@ import io.woong.compose.grid.VerticalGrid
 import xyz.qumn.alumnihub_app.R
 
 @Composable
-fun ImgGrid(imgs: List<String>, maxCols: Int = 3) {
+fun ImgGrid(imgs: Collection<Any?>, maxCols: Int = 3) {
     if (imgs.isEmpty()) return
     val cols = minOf(imgs.size, maxCols)
     VerticalGrid(columns = SimpleGridCells.Fixed(cols), Modifier.fillMaxWidth()) {

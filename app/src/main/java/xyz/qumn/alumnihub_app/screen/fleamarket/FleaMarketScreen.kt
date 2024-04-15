@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,18 +36,27 @@ import java.math.BigDecimal
 fun FleaMarketFlowScreen(onClickTradeCard: (tradeId: Long) -> Unit) {
     val goods = GoodsApi.page(GoodsPageParam())
 
-    LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
-        items(goods.size) {
-            FleaMarketCard(
-                goods = goods[it],
-                onClickTradeCard = onClickTradeCard
-            )
+    Scaffold {
+        Column(Modifier.padding(it)) {
+            LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
+                items(goods.size) {
+                    FleaMarketCard(
+                        goods = goods[it],
+                        onClickTradeCard = onClickTradeCard
+                    )
+                }
+            }
         }
     }
+
 }
 
 @Composable
-fun FleaMarketCard(modifier: Modifier = Modifier, goods: GoodsOverview, onClickTradeCard: (tradeId: Long) -> Unit) {
+fun FleaMarketCard(
+    modifier: Modifier = Modifier,
+    goods: GoodsOverview,
+    onClickTradeCard: (tradeId: Long) -> Unit
+) {
     val titleStyle = MaterialTheme.typography.titleMedium
 
     Card(modifier.padding(3.dp)) {

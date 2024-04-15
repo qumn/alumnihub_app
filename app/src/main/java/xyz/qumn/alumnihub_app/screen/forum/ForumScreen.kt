@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -56,21 +57,25 @@ import java.time.LocalDateTime
 @Composable
 fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
     val postPage = PostApi.page(PostPageParam())
-    LazyColumn(Modifier.background(Color.White)) {
-        items(postPage.list.size) { idx ->
-            val post = postPage.list[idx]
-            Log.d("post", post.toString())
-            PostItem(Modifier, post = post) {
-                onClickPostCard(post.id)
-            }
-            if (idx != postPage.list.size - 1) { // not last, draw a divider
-                Divider(
-                    color = Gray50,
-                    thickness = 1.6.dp,
-                    modifier = Modifier.padding(20.dp, 3.dp)
-                )
-            }
+    Scaffold {
+        Column(Modifier.padding(it)) {
+            LazyColumn(Modifier.background(Color.White)) {
+                items(postPage.list.size) { idx ->
+                    val post = postPage.list[idx]
+                    Log.d("post", post.toString())
+                    PostItem(Modifier, post = post) {
+                        onClickPostCard(post.id)
+                    }
+                    if (idx != postPage.list.size - 1) { // not last, draw a divider
+                        Divider(
+                            color = Gray50,
+                            thickness = 1.6.dp,
+                            modifier = Modifier.padding(20.dp, 3.dp)
+                        )
+                    }
 
+                }
+            }
         }
     }
 }

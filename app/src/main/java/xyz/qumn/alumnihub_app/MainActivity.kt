@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -93,6 +94,7 @@ fun AlumnihubApp() {
         AppState.LocalNavController provides navController
     ) {
         Scaffold(
+            contentWindowInsets = WindowInsets(left = 6.dp, top = 0.dp, right = 6.dp),
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = { AluBottomBar(navController) },
         ) {
@@ -143,7 +145,7 @@ sealed class Screen(
 
     object Add :
         Screen(
-            "/add/forum",
+            "/forum/post/add?showBottom=false",
             "发帖",
             {
                 Box(
