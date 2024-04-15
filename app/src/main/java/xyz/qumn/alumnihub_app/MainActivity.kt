@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Button
@@ -33,7 +36,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -44,6 +49,7 @@ import xyz.qumn.alumnihub_app.composable.useSnackbar
 import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
 import xyz.qumn.alumnihub_app.screen.forum.forum
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
+import xyz.qumn.alumnihub_app.ui.theme.Blue50
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,26 +133,67 @@ sealed class Screen(
             true
         )
 
+    object Forum :
+        Screen(
+            "/forum",
+            "论坛",
+            { Icon(Icons.Filled.Forum, "论坛") },
+            true
+        )
+
+    object Add :
+        Screen(
+            "/add/forum",
+            "发帖",
+            {
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Blue50)
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        "发帖",
+                        modifier = Modifier.padding(4.dp),
+                        tint = Color.White
+                    )
+                }
+            },
+            false
+        )
+
     object LostFound :
-        Screen("/forum", "失物招领", { Icon(Icons.Filled.Flag, "失物招领") }, true)
+        Screen(
+            "/lostfound",
+            "失物招领",
+            { Icon(Icons.Filled.Flag, "失物招领") },
+            true
+        )
 
     object Profile :
-        Screen("/profile", "个人中心", { Icon(Icons.Filled.Person, "个人中心") }, true)
+        Screen(
+            "/profile",
+            "个人中心",
+            { Icon(Icons.Filled.Person, "个人中心") },
+            true
+        )
 }
 
 
 @Composable
 private fun AluBottomBar(navController: NavHostController) {
-    val screens = listOf(Screen.FleaMarket, Screen.LostFound, Screen.Profile)
+    val screens =
+        listOf(Screen.FleaMarket, Screen.Forum, Screen.Add, Screen.LostFound, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     Log.d("nav", "AluBottomBar: ${navBackStackEntry?.arguments}")
-    val showBottom = !(navBackStackEntry?.arguments?.containsKey("showBottom") ?: false) // to show if not contains the showBottom  argument
+    val showBottom = !(navBackStackEntry?.arguments?.containsKey("showBottom")
+        ?: false) // to show if not contains the showBottom  argument
             || navBackStackEntry?.arguments?.getBoolean("showBottom")!! // use the argument, if contains
 
     val to = { screen: Screen ->
         navController.navigate(screen.route) {
-            popUpTo(navController.graph.startDestinationId){
+            popUpTo(navController.graph.startDestinationId) {
                 saveState = true
             }
             launchSingleTop = true
