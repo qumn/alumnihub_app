@@ -117,6 +117,7 @@ private fun Image(img: String, padding: Int = 3) {
         model = img,
         modifier = modifier,
         placeholder = painterResource(id = R.drawable.placeholder),
+        error = painterResource(id = R.drawable.placeholder),
         contentDescription = "image"
     )
 }

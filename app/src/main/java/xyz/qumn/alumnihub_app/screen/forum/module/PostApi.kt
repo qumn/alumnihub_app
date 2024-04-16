@@ -1,5 +1,11 @@
 package xyz.qumn.alumnihub_app.screen.forum.module
 
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.setBody
+import kotlinx.serialization.Serializable
+import xyz.qumn.alumnihub_app.api.ApiClient.client
+import xyz.qumn.alumnihub_app.api.Rsp
 import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.req.PageParam
@@ -12,7 +18,21 @@ data class PostPageParam(
     override var lastId: Long = 0
 ) : PageParam
 
+@Serializable
+data class PostCreateReq(
+    val title: String,
+    val price: String,
+    val imgs: List<String> = emptyList(),
+)
+
 object PostApi
+
+suspend fun PostApi.createNewPost(post: PostCreateReq): Long {
+    val rsp: Rsp<Long> = client.get("/posts") {
+        setBody(post)
+    }.body()
+    return rsp.data!!
+}
 
 fun PostApi.page(postPageParam: PostPageParam): PageRst<Post> {
     return PageRst.of(

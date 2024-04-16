@@ -12,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
@@ -46,9 +46,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.runBlocking
+import xyz.qumn.alumnihub_app.api.token
 import xyz.qumn.alumnihub_app.composable.useSnackbar
+import xyz.qumn.alumnihub_app.data.TokenManager
 import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
 import xyz.qumn.alumnihub_app.screen.forum.forum
+import xyz.qumn.alumnihub_app.screen.login.login
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue50
 
@@ -88,20 +92,25 @@ fun TransparentSystemBars() {
 fun AlumnihubApp() {
     val navController = rememberNavController()
     val snackbarHostState = SnackbarHostState()
+    // get the context
+    val context = LocalContext.current
+    runBlocking {
+        token = TokenManager.getToken(context)
+    }
 
     CompositionLocalProvider(
         AppState.LocalSnackHostState provides snackbarHostState,
         AppState.LocalNavController provides navController
     ) {
         Scaffold(
-            contentWindowInsets = WindowInsets(left = 6.dp, top = 0.dp, right = 6.dp),
+//            contentWindowInsets = WindowInsets(left = 6.dp, top = 0.dp, right = 6.dp),
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = { AluBottomBar(navController) },
         ) {
             Column(Modifier.padding(it)) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.FleaMarket.route,
+                    startDestination = if (token == null) "/login" else Screen.FleaMarket.route,
                     enterTransition = {
                         slideInHorizontally(
                             animationSpec = tween(300),
@@ -113,6 +122,7 @@ fun AlumnihubApp() {
                             targetOffsetX = { fullWidth -> 2 * fullWidth })
                     }
                 ) {
+                    login(navController)
                     fleaMarket(navController)
                     forum(navController)
                 }
@@ -145,7 +155,7 @@ sealed class Screen(
 
     object Add :
         Screen(
-            "/forum/post/add?showBottom=false",
+            "/flea_market/trade/add?showBottom=false",
             "发帖",
             {
                 Box(

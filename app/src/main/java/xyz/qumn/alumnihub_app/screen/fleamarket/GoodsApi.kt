@@ -1,5 +1,12 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket;
 
+import io.ktor.client.call.body
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import kotlinx.serialization.Serializable
+import xyz.qumn.alumnihub_app.api.ApiClient.client
+import xyz.qumn.alumnihub_app.api.Rsp
 import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.req.PageParam
@@ -13,7 +20,28 @@ data class GoodsPageParam(
     override var lastId: Long = 0
 ) : PageParam
 
+@Serializable
+data class CreateGoodsReq(
+    val desc: String,
+    val imgs: List<String> = emptyList(),
+    val price: String,
+)
+
 object GoodsApi {
+    suspend fun publish(desc: String, price: String, imgs: List<String> = emptyList()): Long {
+        client.post {
+        }
+        return client.post("/trades") {
+            setBody(
+                CreateGoodsReq(
+                    desc = desc,
+                    price = price,
+                    imgs = imgs
+                )
+            )
+        }.body<Rsp<Long>>().data!!
+    }
+
     fun page(pageParam: GoodsPageParam): List<GoodsOverview> {
         val goods = mutableListOf<GoodsOverview>()
         for (i in 1..pageParam.pageSize) {

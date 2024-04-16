@@ -11,9 +11,15 @@ fun NavGraphBuilder.fleaMarket(navController: NavController) {
             navController.navigate("/flea_market/trade/$id?showBottom=false")
         }
     }
-    composable("/flea_market/trade/{id}?showBottom={showBottom}") {backStackEntiy ->
+    composable("/flea_market/trade/{id}?showBottom={showBottom}") { backStackEntiy ->
         val id = backStackEntiy.arguments?.getLong("id")
         TradeDetailScreen(id) {
+            navController.popBackStack()
+        }
+    }
+
+    composable("/flea_market/trade/add?showBottom={showBottom}") { backStackEntiy ->
+        CreateTradeScreen {
             navController.popBackStack()
         }
     }
