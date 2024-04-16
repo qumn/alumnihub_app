@@ -1,5 +1,6 @@
 package xyz.qumn.alumnihub_app.api
 
+import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toFile
@@ -18,6 +19,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
@@ -33,7 +35,7 @@ object ApiClient {
     @OptIn(ExperimentalSerializationApi::class)
     var client = HttpClient(Android) {
         defaultRequest {
-            host = "192.168.10.48"
+            host = "192.168.124.9"
             port = 8080
             url {
                 protocol = URLProtocol.HTTP
@@ -86,4 +88,35 @@ object ApiClient {
 
         return client.submitFormWithBinaryData("/files/upload", form).body<Rsp<String>>().data!!
     }
+
+    suspend fun upload(contentResolver: ContentResolver, uri: Uri): String? {
+        val inputStream = contentResolver.openInputStream(uri)!!
+        val mimeType = contentResolver.getType(uri)
+
+        val url = client.submitFormWithBinaryData("/files/upload", formData = formData {
+            append("file", inputStream.readBytes(), Headers.build {
+                append(HttpHeaders.ContentType, mimeType!!)
+                append(
+                    HttpHeaders.ContentDisposition,
+                    "filename=image.${getFileExtensionFromMimeType(mimeType)}"
+                )
+            })
+        }).body<Rsp<String>>().data
+        Log.d("iamge", "upload: the image url ${url}")
+        return url
+    }
+
+    fun getFileExtensionFromMimeType(mimeType: String): String {
+        return when (mimeType) {
+            "image/jpeg" -> "jpg"
+            "image/png" -> "png"
+            "image/gif" -> "gif"
+            // Add more mappings for other MIME types as needed
+            else -> {
+                // For unknown MIME types, return a default extension or handle it as needed
+                "unknown"
+            }
+        }
+    }
+
 }

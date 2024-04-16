@@ -1,6 +1,5 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,10 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import xyz.qumn.alumnihub_app.api.ApiClient
 import xyz.qumn.alumnihub_app.composable.ImgGridPicker
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue60
@@ -51,15 +47,14 @@ import xyz.qumn.alumnihub_app.ui.theme.Blue60
 fun CreateTradeScreen(onClickBack: () -> Unit) {
     var price by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    val selectedImageUris = remember { mutableStateListOf<Uri>() }
+    val selectedImageUrl = remember { mutableStateListOf<String>() }
 
     Scaffold(
         contentWindowInsets = WindowInsets(top = 0.dp),
         topBar = {
             topBar(onClickBack) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val imgUrl = uploadFiles(selectedImageUris)
-                    publishIdel(content, price, imgUrl)
+                    publishIdel(content, price, selectedImageUrl)
                     CoroutineScope(Dispatchers.Main).launch {
                         onClickBack()
                     }
@@ -102,13 +97,13 @@ fun CreateTradeScreen(onClickBack: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ImgGridPicker(
-                        selectedImageUris,
+                        selectedImageUrl,
                         onImgAdd = { selectedImages ->
                             Log.d("ImgGridPicker", "ImagePicker: call the on change function")
-                            selectedImageUris.addAll(selectedImages)
+                            selectedImageUrl.addAll(selectedImages)
                         },
                         onImgRemove = { idx ->
-                            selectedImageUris.removeAt(idx)
+                            selectedImageUrl.removeAt(idx)
                         }
                     )
                 }
@@ -199,14 +194,6 @@ private fun topBar(onClickBack: () -> Unit, onClickPublish: () -> Unit) {
 
 suspend fun publishIdel(desc: String, price: String, imgs: List<String>) {
     GoodsApi.publish(desc, price, imgs)
-}
-
-suspend fun uploadFiles(uris: List<Uri>): List<String> = coroutineScope {
-    uris.map { uri ->
-        async { ApiClient.upload(uri) }
-    }.map {
-        it.await()
-    }
 }
 
 @Composable

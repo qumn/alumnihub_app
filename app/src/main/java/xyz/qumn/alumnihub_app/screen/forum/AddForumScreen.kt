@@ -1,6 +1,5 @@
 package xyz.qumn.alumnihub_app.screen.forum
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -43,7 +42,7 @@ import xyz.qumn.alumnihub_app.ui.theme.Blue60
 fun AddForumScreen(onClickBack: () -> Unit) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    val selectedImageUris = remember { mutableStateListOf<Uri>() }
+    val selectedImageUris = remember { mutableStateListOf<String>() }
 
     Scaffold(
         contentWindowInsets = WindowInsets(top = 0.dp),

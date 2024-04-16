@@ -1,5 +1,6 @@
 package xyz.qumn.alumnihub_app.composable
 
+import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -32,13 +34,19 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.woong.compose.grid.SimpleGridCells
 import io.woong.compose.grid.VerticalGrid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.R
+import xyz.qumn.alumnihub_app.api.ApiClient
 
 @Composable
 fun ImgGridPicker(
-    imgs: Collection<Uri?>,
+    imgs: Collection<String?>,
     onImgRemove: (Int) -> Unit,
-    onImgAdd: (List<Uri>) -> Unit,
+    onImgAdd: (List<String>) -> Unit,
     height: Dp = 120.dp,
     maxCols: Int = 3
 ) {
@@ -82,24 +90,39 @@ fun ImgGridPicker(
 
 @Composable
 private fun ImageAdd(
-    onImageAdd: (List<Uri>) -> Unit,
+    onImageAdd: (List<String>) -> Unit,
     maxItems: Int = 9,
     height: Dp = 120.dp,
     width: Dp = 20.dp
 ) {
+
+    val contentResolver = LocalContext.current.contentResolver
     val photoPickerLauncher = if (maxItems == 1) {
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
             onResult = { it ->
-                it?.let {
-                    onImageAdd(listOf(it))
+                it?.let { uri ->
+                    uri ?: return@let
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val urls = uploadFiles(contentResolver, listOf(uri))
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onImageAdd(urls)
+                        }
+                    }
                 }
             }
         )
     } else {
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems),
-            onResult = onImageAdd
+            onResult = { uris ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    val urls = uploadFiles(contentResolver, uris)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onImageAdd(urls)
+                    }
+                }
+            }
         )
     }
     IconButton(
@@ -127,6 +150,18 @@ private fun ImageAdd(
     }
 }
 
+
+suspend fun uploadFiles(contentResolver: ContentResolver, uris: List<Uri>): List<String> =
+    coroutineScope {
+        uris.map { uri ->
+            async { ApiClient.upload(contentResolver, uri) }
+        }
+            .map {
+                it.await()
+            }
+            .filterNotNull()
+            .map { it }
+    }
 
 @Composable
 @Preview
