@@ -18,8 +18,6 @@ fun NavGraphBuilder.forum(navController: NavController) {
     }
     composable("/forum/post/add?showBottom={showBottom}") { backStackEntity ->
         val id = backStackEntity.arguments?.getLong("id")
-        CreateFormPage {
-            navController.popBackStack()
-        }
+        CreateFormPage()
     }
 }

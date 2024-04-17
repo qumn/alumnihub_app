@@ -35,7 +35,8 @@ fun CreateFormPage() {
 
     Column(
         Modifier
-            .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val interactionSource = remember { MutableInteractionSource() }
         val isFocused by interactionSource.collectIsFocusedAsState()

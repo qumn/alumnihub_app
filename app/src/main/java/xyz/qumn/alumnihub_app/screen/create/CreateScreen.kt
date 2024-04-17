@@ -1,7 +1,7 @@
 package xyz.qumn.alumnihub_app.screen.create
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +11,9 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,19 +48,20 @@ fun CreateScreen(onClickClose: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val selectedTabIndex by remember { derivedStateOf { pagerState.currentPage } }
     Scaffold(
-        topBar = { topBar(pagerState, titles, selectedTabIndex, onClickClose) }
+        topBar = { topBar(pagerState, titles, selectedTabIndex, onClickClose) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {}) {
+                Icon(Icons.Filled.Navigation, null)
+            }
+        }
     ) {
         Column(
             Modifier
                 .padding(it)
-                .fillMaxSize()
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Top
         ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) { page ->
+            HorizontalPager(state = pagerState) { page ->
                 if (page == 0) {
                     CreateTradePage()
                 } else if (page == 1) {

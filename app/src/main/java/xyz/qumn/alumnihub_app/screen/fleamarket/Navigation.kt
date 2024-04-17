@@ -19,8 +19,6 @@ fun NavGraphBuilder.fleaMarket(navController: NavController) {
     }
 
     composable("/flea_market/trade/add?showBottom={showBottom}") { backStackEntiy ->
-        CreateTradePage {
-            navController.popBackStack()
-        }
+        CreateTradePage()
     }
 }
