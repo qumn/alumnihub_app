@@ -21,7 +21,8 @@ fun useSnackbar(msg: String): SnackbarHelper {
 
     if (isShow.value) {
         LaunchedEffect(Unit) {
-            snackbarHostState.showSnackbar(msg)
+            snackbarHostState?.showSnackbar(msg)
+            isShow.value = false
         }
     }
     return SnackbarHelper(isShow)

@@ -81,6 +81,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-android:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+//    implementation("io.ktor:ktor-client-logging-native:$ktorVersion")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // Coroutines

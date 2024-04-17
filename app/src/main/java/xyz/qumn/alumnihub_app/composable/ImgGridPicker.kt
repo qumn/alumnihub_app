@@ -41,21 +41,22 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.api.ApiClient
+import xyz.qumn.alumnihub_app.module.URL
 
 @Composable
 fun ImgGridPicker(
-    imgs: Collection<String?>,
+    imgs: Collection<URL>,
     onImgRemove: (Int) -> Unit,
-    onImgAdd: (List<String>) -> Unit,
+    onImgAdd: (List<URL>) -> Unit,
     height: Dp = 120.dp,
     maxCols: Int = 3
 ) {
-    Log.d("image-grid-picker", "ImgGridPicker: ${imgs}")
+    Log.d("image-grid-picker", "ImgGridPicker: $imgs")
     VerticalGrid(columns = SimpleGridCells.Fixed(maxCols), Modifier.fillMaxWidth()) {
         for ((idx, img) in imgs.withIndex()) {
             Box {
                 AsyncImage(
-                    model = img,
+                    model = img.location,
                     modifier = Modifier
                         .padding(2.dp)
                         .height(height),
@@ -90,40 +91,45 @@ fun ImgGridPicker(
 
 @Composable
 private fun ImageAdd(
-    onImageAdd: (List<String>) -> Unit,
-    maxItems: Int = 9,
-    height: Dp = 120.dp,
-    width: Dp = 20.dp
+    onImageAdd: (List<URL>) -> Unit, maxItems: Int = 9, height: Dp = 120.dp, width: Dp = 20.dp
 ) {
 
     val contentResolver = LocalContext.current.contentResolver
+    val snackBarHelper = useSnackbar(msg = "文件上传失败, 请重新尝试")
+
     val photoPickerLauncher = if (maxItems == 1) {
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia(),
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia(),
             onResult = { it ->
                 it?.let { uri ->
-                    uri ?: return@let
                     CoroutineScope(Dispatchers.IO).launch {
                         val urls = uploadFiles(contentResolver, listOf(uri))
                         CoroutineScope(Dispatchers.Main).launch {
-                            onImageAdd(urls)
+                            val (successRst, failureRst) = urls.partition { it.isSuccess }
+                            val successUrl = successRst.map { it.getOrThrow() }
+                            if (failureRst.isNotEmpty()) {
+                                snackBarHelper.show()
+                            }
+                            onImageAdd(successUrl)
                         }
                     }
                 }
-            }
-        )
+            })
     } else {
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems),
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickMultipleVisualMedia(
+            maxItems
+        ),
             onResult = { uris ->
                 CoroutineScope(Dispatchers.IO).launch {
                     val urls = uploadFiles(contentResolver, uris)
                     CoroutineScope(Dispatchers.Main).launch {
-                        onImageAdd(urls)
+                        val (successRst, failureRst) = urls.partition { it.isSuccess }
+                        if (failureRst.isNotEmpty()) {
+                            snackBarHelper.show()
+                        }
+                        onImageAdd(successRst.map { it.getOrThrow() })
                     }
                 }
-            }
-        )
+            })
     }
     IconButton(
         onClick = {
@@ -132,8 +138,7 @@ private fun ImageAdd(
                     ActivityResultContracts.PickVisualMedia.ImageOnly
                 )
             )
-        },
-        modifier = Modifier
+        }, modifier = Modifier
             .width(width)
             .height(height)
             .background(
@@ -143,24 +148,20 @@ private fun ImageAdd(
         Icon(
             Icons.Outlined.Add,
             contentDescription = "add a image",
-            Modifier
-                .size(36.dp),
+            Modifier.size(36.dp),
             tint = Color.White,
         )
     }
 }
 
 
-suspend fun uploadFiles(contentResolver: ContentResolver, uris: List<Uri>): List<String> =
+suspend fun uploadFiles(contentResolver: ContentResolver, uris: List<Uri>): List<Result<URL>> =
     coroutineScope {
         uris.map { uri ->
             async { ApiClient.upload(contentResolver, uri) }
+        }.map {
+            it.await()
         }
-            .map {
-                it.await()
-            }
-            .filterNotNull()
-            .map { it }
     }
 
 @Composable

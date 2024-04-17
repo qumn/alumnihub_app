@@ -103,7 +103,6 @@ fun AlumnihubApp() {
         AppState.LocalNavController provides navController
     ) {
         Scaffold(
-//            contentWindowInsets = WindowInsets(left = 6.dp, top = 0.dp, right = 6.dp),
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = { AluBottomBar(navController) },
         ) {

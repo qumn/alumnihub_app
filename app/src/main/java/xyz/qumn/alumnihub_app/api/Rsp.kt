@@ -1,4 +1,4 @@
-package xyz.qumn.alumnihub_app.api;
+package xyz.qumn.alumnihub_app.api
 
 import kotlinx.serialization.Serializable
 

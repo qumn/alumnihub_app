@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.api.UserApi
-import xyz.qumn.alumnihub_app.api.token
+import xyz.qumn.alumnihub_app.composable.useSnackbar
 import xyz.qumn.alumnihub_app.data.TokenManager
 
 @Composable
@@ -25,6 +25,7 @@ fun LoginPage(back: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val snackBarHelper = useSnackbar(msg = "账号密码错误")
 
     Scaffold {
         Column(Modifier.padding(it)) {
@@ -32,11 +33,16 @@ fun LoginPage(back: () -> Unit) {
             TextField(value = password, onValueChange = { password = it })
             Button(onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    token = UserApi.login(username, password)
-                    TokenManager.saveToken(context, token!!)
-                    CoroutineScope(Dispatchers.Main).launch {
-                        back()
-                    }
+                    UserApi.login(username, password)
+                        .onSuccess { token ->
+                            TokenManager.saveToken(context, token)
+                            CoroutineScope(Dispatchers.Main).launch {
+                                back()
+                            }
+                        }
+                        .onFailure {
+                            snackBarHelper.show()
+                        }
                 }
             }) {
                 Text("Login")

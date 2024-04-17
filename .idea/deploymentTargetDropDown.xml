@@ -2,7 +2,23 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="ImgGridPickerPreview">
+      <entry key="AddForumScreenPreview (1)">
+        <State>
+          <runningDeviceTargetSelectedWithDropDown>
+            <Target>
+              <type value="RUNNING_DEVICE_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="$USER_HOME$/.android/avd/Medium_Phone_API_30.avd" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </runningDeviceTargetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-04-17T09:35:59.502913Z" />
+        </State>
+      </entry>
+      <entry key="CreateScreenPreview">
         <State />
       </entry>
       <entry key="PostItemPreview">
@@ -16,12 +32,12 @@
               <deviceKey>
                 <Key>
                   <type value="SERIAL_NUMBER" />
-                  <value value="adb-7fbe1d-1DhqSm._adb-tls-connect._tcp" />
+                  <value value="adb-7fbe1d-1DhqSm._adb-tls-connect._tcp." />
                 </Key>
               </deviceKey>
             </Target>
           </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-04-16T13:05:06.335479689Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-04-17T06:39:08.491259Z" />
         </State>
       </entry>
     </value>

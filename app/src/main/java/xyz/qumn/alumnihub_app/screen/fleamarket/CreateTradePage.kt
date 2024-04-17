@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -16,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,86 +34,69 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.composable.ImgGridPicker
+import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue60
 
 @Composable
-fun CreateTradeScreen(onClickBack: () -> Unit) {
+fun CreateTradePage() {
     var price by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    val selectedImageUrl = remember { mutableStateListOf<String>() }
+    val selectedImageUrl = remember { mutableStateListOf<URL>() }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(top = 0.dp),
-        topBar = {
-            topBar(onClickBack) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    publishIdel(content, price, selectedImageUrl)
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onClickBack()
-                    }
-                }
-            }
-        }
+    val priceRegex = Regex("^[0-9]+(\\.[0-9]{1,2})?$")
+    val contentPlaceHolderTextStyle = MaterialTheme.typography.bodyMedium
+    Column(
+        Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            Modifier
-                .padding(it)
-                .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val priceRegex = Regex("^[0-9]+(\\.[0-9]{1,2})?$")
-            val contentPlaceHolderTextStyle = MaterialTheme.typography.bodyMedium
-
-            TextField(
-                value = content,
-                onValueChange = { content = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        "描述一下宝贝的品牌型号，货品来源...",
-                        style = contentPlaceHolderTextStyle,
-                        color = Color.Black.copy(.6f)
-                    )
-                },
-                minLines = 3,
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Color.White,
+        TextField(
+            value = content,
+            onValueChange = { content = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
+                Text(
+                    "描述一下宝贝的品牌型号，货品来源...",
+                    style = contentPlaceHolderTextStyle,
+                    color = Color.Black.copy(.6f)
                 )
+            },
+            minLines = 3,
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = Color.White,
             )
+        )
 
-            Surface(Modifier.fillMaxWidth()) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ImgGridPicker(
-                        selectedImageUrl,
-                        onImgAdd = { selectedImages ->
-                            Log.d("ImgGridPicker", "ImagePicker: call the on change function")
-                            selectedImageUrl.addAll(selectedImages)
-                        },
-                        onImgRemove = { idx ->
-                            selectedImageUrl.removeAt(idx)
-                        }
-                    )
-                }
+        Surface(Modifier.fillMaxWidth()) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ImgGridPicker(
+                    selectedImageUrl,
+                    onImgAdd = { selectedImages ->
+                        Log.d("ImgGridPicker", "ImagePicker: call the on change function")
+                        selectedImageUrl.addAll(selectedImages)
+                    },
+                    onImgRemove = { idx ->
+                        selectedImageUrl.removeAt(idx)
+                    }
+                )
             }
-
-            PriceInput(price) { newPrice ->
-                if (newPrice.isEmpty() || priceRegex.matches(newPrice)) {
-                    price = newPrice
-                }
-            }
-
         }
+
+        PriceInput(price) { newPrice ->
+            if (newPrice.isEmpty() || priceRegex.matches(newPrice)) {
+                price = newPrice
+            }
+        }
+
     }
 }
 
@@ -192,7 +173,7 @@ private fun topBar(onClickBack: () -> Unit, onClickPublish: () -> Unit) {
     )
 }
 
-suspend fun publishIdel(desc: String, price: String, imgs: List<String>) {
+suspend fun publishIdel(desc: String, price: String, imgs: List<URL>) {
     GoodsApi.publish(desc, price, imgs)
 }
 
@@ -200,6 +181,6 @@ suspend fun publishIdel(desc: String, price: String, imgs: List<String>) {
 @Preview
 fun AddForumScreenPreview() {
     Alumnihub_appTheme {
-        CreateTradeScreen {}
+        CreateTradePage()
     }
 }

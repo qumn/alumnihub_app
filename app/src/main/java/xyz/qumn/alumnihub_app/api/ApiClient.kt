@@ -3,7 +3,6 @@ package xyz.qumn.alumnihub_app.api
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toFile
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -12,30 +11,33 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
-import io.ktor.client.request.forms.InputProvider
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.streams.asInput
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import xyz.qumn.alumnihub_app.module.URL
 
 var token: String? = null
 
 object ApiClient {
 
     //Configure the HttpCLient
-    @OptIn(ExperimentalSerializationApi::class)
-    var client = HttpClient(Android) {
+    val client = HttpClient(Android) {
         defaultRequest {
-            host = "192.168.124.9"
+            host = "192.168.10.48"
             port = 8080
             url {
                 protocol = URLProtocol.HTTP
@@ -43,6 +45,7 @@ object ApiClient {
         }
         // For Logging
         install(Logging) {
+            logger = CustomAndroidHttpLogger
             level = LogLevel.ALL
         }
 
@@ -76,34 +79,60 @@ object ApiClient {
         }
     }
 
-    suspend fun upload(uri: Uri): String {
-        val file = uri.toFile()
-        Log.d("api-client", "uploading file $file")
-
-        val form = formData {
-            append("file", InputProvider(file.length()) {
-                file.inputStream().asInput()
-            })
+    suspend inline fun <reified T> get(
+        uri: String,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): Result<T> {
+        return runCatching { client.get(uri).body<Rsp<T>>().data!! }.onFailure {
+            Log.e("api", "get: ${it.message}")
         }
-
-        return client.submitFormWithBinaryData("/files/upload", form).body<Rsp<String>>().data!!
     }
 
-    suspend fun upload(contentResolver: ContentResolver, uri: Uri): String? {
-        val inputStream = contentResolver.openInputStream(uri)!!
-        val mimeType = contentResolver.getType(uri)
+    suspend inline fun <reified T> post(
+        uri: String,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): Result<T> {
+        return runCatching { client.post(uri, block).body<Rsp<T>>().data!! }.onFailure {
+            Log.e("api", "post: ${it.message}")
+        }
+    }
 
-        val url = client.submitFormWithBinaryData("/files/upload", formData = formData {
-            append("file", inputStream.readBytes(), Headers.build {
-                append(HttpHeaders.ContentType, mimeType!!)
-                append(
-                    HttpHeaders.ContentDisposition,
-                    "filename=image.${getFileExtensionFromMimeType(mimeType)}"
-                )
-            })
-        }).body<Rsp<String>>().data
-        Log.d("iamge", "upload: the image url ${url}")
-        return url
+    suspend inline fun <reified T> put(
+        uri: String,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): Result<T> {
+        return runCatching { client.put(uri, block).body<Rsp<T>>().data!! }.onFailure {
+            Log.e("api", "put: ${it.message}")
+        }
+    }
+
+    suspend inline fun <reified T> delete(
+        uri: String,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): Result<T> {
+        return runCatching { client.delete(uri, block).body<Rsp<T>>().data!! }.onFailure {
+            Log.e("api", "delete: ${it.message}")
+        }
+    }
+
+    suspend fun upload(contentResolver: ContentResolver, uri: Uri): Result<URL> {
+        return runCatching {
+            val inputStream = contentResolver.openInputStream(uri)!!
+            val mimeType = contentResolver.getType(uri)
+
+            val url = client.submitFormWithBinaryData("/files/upload", formData = formData {
+                append("file", inputStream.readBytes(), Headers.build {
+                    append(HttpHeaders.ContentType, mimeType!!)
+                    append(
+                        HttpHeaders.ContentDisposition,
+                        "filename=image.${getFileExtensionFromMimeType(mimeType)}"
+                    )
+                })
+            }).body<Rsp<URL>>().data
+            inputStream.close()
+            Log.d("iamge", "upload: the image url $url")
+            url!!
+        }
     }
 
     fun getFileExtensionFromMimeType(mimeType: String): String {
@@ -119,4 +148,12 @@ object ApiClient {
         }
     }
 
+}
+
+private object CustomAndroidHttpLogger : Logger {
+    private const val logTag = "CustomAndroidHttpLogger"
+
+    override fun log(message: String) {
+        Log.i(logTag, message)
+    }
 }

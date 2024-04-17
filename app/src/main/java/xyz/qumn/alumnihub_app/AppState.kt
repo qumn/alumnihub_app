@@ -7,8 +7,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavController
 
 object AppState {
-    internal val LocalSnackHostState: ProvidableCompositionLocal<SnackbarHostState> =
-        staticCompositionLocalOf { error("no snack host be set") }
+    internal val LocalSnackHostState: ProvidableCompositionLocal<SnackbarHostState?> =
+        staticCompositionLocalOf { null }
 
     internal val LocalNavController: ProvidableCompositionLocal<NavController> =
         staticCompositionLocalOf { error("no nav controller be set") }
