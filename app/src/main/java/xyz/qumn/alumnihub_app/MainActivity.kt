@@ -13,6 +13,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -48,8 +49,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.runBlocking
 import xyz.qumn.alumnihub_app.api.token
-import xyz.qumn.alumnihub_app.composable.useSnackbar
+import xyz.qumn.alumnihub_app.composable.useSnack
 import xyz.qumn.alumnihub_app.data.TokenManager
+import xyz.qumn.alumnihub_app.screen.create.creation
 import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
 import xyz.qumn.alumnihub_app.screen.forum.forum
 import xyz.qumn.alumnihub_app.screen.login.login
@@ -103,7 +105,7 @@ fun AlumnihubApp() {
         AppState.LocalNavController provides navController
     ) {
         Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState, Modifier.offset(0.dp, (-30).dp)) },
             bottomBar = { AluBottomBar(navController) },
         ) {
             Column(Modifier.padding(it)) {
@@ -124,6 +126,7 @@ fun AlumnihubApp() {
                     login(navController)
                     fleaMarket(navController)
                     forum(navController)
+                    creation(navController)
                 }
             }
         }
@@ -154,7 +157,7 @@ sealed class Screen(
 
     object Add :
         Screen(
-            "/flea_market/trade/add?showBottom=false",
+            "/creation?showBottom=false",
             "发帖",
             {
                 Box(
@@ -238,10 +241,10 @@ fun Profile() {
             style = MaterialTheme.typography.titleLarge
         )
 
-        val snackbarHelper = useSnackbar(msg = "Hello Home")
+        val snackHelper = useSnack()
 
         Button(onClick = {
-            snackbarHelper.show()
+            snackHelper.show("Hello Home")
         }) {
             Text(text = "Show message")
         }
@@ -262,10 +265,10 @@ fun LostFound() {
             color = Color.White,
             style = MaterialTheme.typography.titleLarge
         )
-        val snackbarHelper = useSnackbar(msg = "Hello Lost Found")
+        val snackHelper = useSnack()
 
         Button(onClick = {
-            snackbarHelper.show()
+            snackHelper.show("Hello Lost Found")
         }) {
             Text(text = "Show message")
         }

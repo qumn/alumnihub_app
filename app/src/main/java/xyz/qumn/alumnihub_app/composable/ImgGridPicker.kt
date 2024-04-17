@@ -95,7 +95,7 @@ private fun ImageAdd(
 ) {
 
     val contentResolver = LocalContext.current.contentResolver
-    val snackBarHelper = useSnackbar(msg = "文件上传失败, 请重新尝试")
+    val snackHelper = useSnack()
 
     val photoPickerLauncher = if (maxItems == 1) {
         rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia(),
@@ -107,7 +107,7 @@ private fun ImageAdd(
                             val (successRst, failureRst) = urls.partition { it.isSuccess }
                             val successUrl = successRst.map { it.getOrThrow() }
                             if (failureRst.isNotEmpty()) {
-                                snackBarHelper.show()
+                                snackHelper.show("文件上传失败, 请重新尝试")
                             }
                             onImageAdd(successUrl)
                         }
@@ -124,7 +124,7 @@ private fun ImageAdd(
                     CoroutineScope(Dispatchers.Main).launch {
                         val (successRst, failureRst) = urls.partition { it.isSuccess }
                         if (failureRst.isNotEmpty()) {
-                            snackBarHelper.show()
+                            snackHelper.show("文件上传失败, 请重新尝试")
                         }
                         onImageAdd(successRst.map { it.getOrThrow() })
                     }

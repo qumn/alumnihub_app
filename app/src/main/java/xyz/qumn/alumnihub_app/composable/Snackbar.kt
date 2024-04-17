@@ -8,22 +8,22 @@ import androidx.compose.runtime.remember
 import xyz.qumn.alumnihub_app.AppState
 
 
-data class SnackbarHelper(val isShow: MutableState<Boolean>) {
-    fun show() {
-        isShow.value = true
+data class SnackbarHelper(val _msg: MutableState<String?>) {
+    fun show(msg: String) {
+        _msg.value = msg
     }
 }
 
 @Composable
-fun useSnackbar(msg: String): SnackbarHelper {
-    val snackbarHostState = AppState.LocalSnackHostState.current
-    val isShow = remember { mutableStateOf(false) }
+fun useSnack(): SnackbarHelper {
+    val snackHostState = AppState.LocalSnackHostState.current
+    val msg: MutableState<String?> = remember { mutableStateOf(null) }
 
-    if (isShow.value) {
+    if (msg.value != null) {
         LaunchedEffect(Unit) {
-            snackbarHostState?.showSnackbar(msg)
-            isShow.value = false
+            snackHostState?.showSnackbar(msg.value!!)
+            msg.value = null
         }
     }
-    return SnackbarHelper(isShow)
+    return SnackbarHelper(msg)
 }

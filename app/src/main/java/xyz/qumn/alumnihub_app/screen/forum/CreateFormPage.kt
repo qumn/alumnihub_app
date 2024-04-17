@@ -28,7 +28,7 @@ import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 @Composable
-fun CreateFormPage() {
+fun CreateFormPage(back: () -> Unit) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     val selectedImageUris = remember { mutableStateListOf<URL>() }
@@ -111,6 +111,6 @@ fun CreateFormPage() {
 @Preview
 fun AddForumScreenPreview() {
     Alumnihub_appTheme {
-        CreateFormPage()
+        CreateFormPage {}
     }
 }

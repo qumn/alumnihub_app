@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.api.UserApi
-import xyz.qumn.alumnihub_app.composable.useSnackbar
+import xyz.qumn.alumnihub_app.composable.useSnack
 import xyz.qumn.alumnihub_app.data.TokenManager
 
 @Composable
@@ -25,7 +25,7 @@ fun LoginPage(back: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
-    val snackBarHelper = useSnackbar(msg = "账号密码错误")
+    val snackHelper = useSnack()
 
     Scaffold {
         Column(Modifier.padding(it)) {
@@ -41,7 +41,7 @@ fun LoginPage(back: () -> Unit) {
                             }
                         }
                         .onFailure {
-                            snackBarHelper.show()
+                            snackHelper.show("账号密码错误")
                         }
                 }
             }) {

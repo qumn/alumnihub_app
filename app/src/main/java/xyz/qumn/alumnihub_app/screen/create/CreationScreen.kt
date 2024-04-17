@@ -11,9 +11,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,11 +47,6 @@ fun CreateScreen(onClickClose: () -> Unit) {
     val selectedTabIndex by remember { derivedStateOf { pagerState.currentPage } }
     Scaffold(
         topBar = { topBar(pagerState, titles, selectedTabIndex, onClickClose) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
-                Icon(Icons.Filled.Navigation, null)
-            }
-        }
     ) {
         Column(
             Modifier
@@ -63,16 +56,13 @@ fun CreateScreen(onClickClose: () -> Unit) {
         ) {
             HorizontalPager(state = pagerState) { page ->
                 if (page == 0) {
-                    CreateTradePage()
+                    CreateTradePage { onClickClose() }
                 } else if (page == 1) {
-                    CreateFormPage()
+                    CreateFormPage { onClickClose() }
                 }
             }
         }
-
-
     }
-
 }
 
 
