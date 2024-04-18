@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.screen.fleamarket.CreateTradePage
 import xyz.qumn.alumnihub_app.screen.forum.CreateFormPage
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
-import xyz.qumn.alumnihub_app.ui.theme.Blue60
+import xyz.qumn.alumnihub_app.ui.theme.Blue80
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -91,7 +91,7 @@ private fun topBar(
                     TabRowDefaults.Indicator(
                         Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
                         height = 4.dp,
-                        color = Blue60.copy(.3f),
+                        color = Blue80.copy(.3f),
                     )
                 }) {
                 titles.forEachIndexed { idx, title ->

@@ -33,7 +33,7 @@ import xyz.qumn.alumnihub_app.composable.SlidingCarousel
 import xyz.qumn.alumnihub_app.module.User
 
 @Composable
-fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit) {
+fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: () -> Unit) {
     val goods = GoodsApi.get(tradeId!!)
 
     val titleStyle = MaterialTheme.typography.titleLarge
@@ -43,7 +43,7 @@ fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit) {
             TopBar(title = "商品详情", onClickBack)
         },
         bottomBar = {
-            BottomBar()
+            BottomBar(toConversation)
         }
     ) {
         Column(Modifier.padding(it)) {
@@ -96,7 +96,7 @@ fun TopBar(title: String, onClickBack: () -> Unit) {
 }
 
 @Composable
-fun BottomBar() {
+fun BottomBar(toConversation: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -108,7 +108,7 @@ fun BottomBar() {
             Icon(Icons.Outlined.Chat, "leave a message")
             Text(text = "留言", style = MaterialTheme.typography.labelSmall)
         }
-        Button(onClick = { /*TODO*/ }) {
+        Button(onClick = { toConversation() }) {
             Icon(imageVector = Icons.Outlined.ShoppingCart, contentDescription = "chat icon")
             Spacer(modifier = Modifier.width(4.dp))
             Text(text = "我想要", style = MaterialTheme.typography.titleSmall)
@@ -120,5 +120,5 @@ fun BottomBar() {
 @Preview
 @Composable
 fun GoodsDetailPreview() {
-    TradeDetailScreen(1L) {}
+    TradeDetailScreen(1L, {}) {}
 }
