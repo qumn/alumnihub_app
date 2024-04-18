@@ -13,6 +13,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,7 +106,7 @@ fun AlumnihubApp() {
         AppState.LocalNavController provides navController
     ) {
         Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState, Modifier.offset(0.dp, (-30).dp)) },
+            snackbarHost = { SnackbarHost(snackbarHostState, Modifier.imePadding()) },
             bottomBar = { AluBottomBar(navController) },
         ) {
             Column(Modifier.padding(it)) {

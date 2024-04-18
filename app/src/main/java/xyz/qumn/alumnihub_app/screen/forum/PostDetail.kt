@@ -4,10 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.outlined.AddComment
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Star
@@ -138,6 +142,7 @@ fun TopBar(title: String, onClickBack: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BottomBar() {
     var comment by remember { mutableStateOf("") }
@@ -165,10 +170,16 @@ fun BottomBar() {
             placeholderText = "写点什么"
         )
 
-        val modifier = Modifier.weight(2f)
-        IconText(modifier, icon = Icons.Outlined.ThumbUp, "20")
-        IconText(modifier, icon = Icons.Outlined.Star, "2")
-        IconText(modifier, icon = Icons.Outlined.AddComment, "19")
+        if (WindowInsets.isImeVisible) {
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Filled.Publish, null)
+            }
+        } else {
+            val modifier = Modifier.weight(2f)
+            IconText(modifier, icon = Icons.Outlined.ThumbUp, "20")
+            IconText(modifier, icon = Icons.Outlined.Star, "2")
+            IconText(modifier, icon = Icons.Outlined.AddComment, "19")
+        }
     }
 }
 

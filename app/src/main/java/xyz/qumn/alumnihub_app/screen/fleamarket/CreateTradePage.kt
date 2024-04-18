@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -55,7 +55,8 @@ fun CreateTradePage(back: () -> Unit) {
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        floatingActionButton = { FloatingButton(desc, price, selectedImageUrl, back) }
+        floatingActionButton = { FloatingButton(desc, price, selectedImageUrl, back) },
+        bottomBar = {  }
     ) {
         Column(
             Modifier
@@ -121,27 +122,31 @@ private fun FloatingButton(
 ) {
     val snackHelper = useSnack()
     var isLoading by remember { mutableStateOf(false) }
-    FloatingActionButton(onClick = {
-        if (isLoading) return@FloatingActionButton
-        if (!validationInput(snackHelper, desc, price, selectedImageUrl)) {
-            return@FloatingActionButton
-        }
-        isLoading = true
-        CoroutineScope(Dispatchers.IO).launch {
-            publishIdel(desc, price, selectedImageUrl).onSuccess {
-                CoroutineScope(Dispatchers.Main).launch {
-                    isLoading = false
-                    snackHelper.show("发布成功")
-                    back()
-                }
-            }.onFailure {
-                CoroutineScope(Dispatchers.Main).launch {
-                    isLoading = false
-                    snackHelper.show("网络波动, 请稍候再试")
+    FloatingActionButton(
+        onClick = {
+            if (isLoading) return@FloatingActionButton
+            if (!validationInput(snackHelper, desc, price, selectedImageUrl)) {
+                return@FloatingActionButton
+            }
+            isLoading = true
+            CoroutineScope(Dispatchers.IO).launch {
+                publishIdel(desc, price, selectedImageUrl).onSuccess {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        isLoading = false
+                        snackHelper.show("发布成功")
+                        back()
+                    }
+                }.onFailure {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        isLoading = false
+                        snackHelper.show("网络波动, 请稍候再试")
+                    }
                 }
             }
-        }
-    }, Modifier.offset((-30).dp, (-60).dp)) {
+        },
+        Modifier
+            .imePadding()
+    ) {
         if (isLoading) {
             CircularPulsatingIndicator()
         } else {
