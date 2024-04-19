@@ -2,18 +2,33 @@ package xyz.qumn.alumnihub_app
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 
 object AppState {
-    internal val LocalSnackHostState: ProvidableCompositionLocal<SnackbarHostState?> =
-        staticCompositionLocalOf { null }
+    internal val LocalSnackHostState: ProvidableCompositionLocal<SnackbarHostState> =
+        staticCompositionLocalOf { error("no local snack host be set") }
 
-    internal val LocalNavController: ProvidableCompositionLocal<NavController> =
+    internal val LocalNavController: ProvidableCompositionLocal<NavHostController> =
         staticCompositionLocalOf { error("no nav controller be set") }
 
 
-    val navController: NavController
+    val navController: NavHostController
         @Composable get() = LocalNavController.current
+
+    @Composable
+    fun ProvideAppState(content: @Composable () -> Unit) {
+        val navController = rememberNavController()
+        val snackbarHostState = SnackbarHostState()
+
+        CompositionLocalProvider(
+            LocalSnackHostState provides snackbarHostState,
+            LocalNavController provides navController
+        ) {
+            content()
+        }
+    }
 }

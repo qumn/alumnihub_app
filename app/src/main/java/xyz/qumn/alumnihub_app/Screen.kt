@@ -10,6 +10,21 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Store
+import androidx.compose.material.icons.outlined.Architecture
+import androidx.compose.material.icons.outlined.Cottage
+import androidx.compose.material.icons.outlined.CurrencyExchange
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material.icons.outlined.FlagCircle
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Handshake
+import androidx.compose.material.icons.outlined.ImageSearch
+import androidx.compose.material.icons.outlined.LocationSearching
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.OutlinedFlag
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material.icons.outlined.ShoppingBasket
+import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,13 +37,14 @@ sealed class Screen(
     val route: String,
     val label: String,
     val icon: @Composable () -> Unit,
-    val isShowBottomBar: Boolean = false
+    val isShowBottomBar: Boolean = false,
+    val enable: Boolean = true
 ) {
     object FleaMarket :
         Screen(
             "/flea_market",
             "跳蚤市场",
-            { Icon(Icons.Filled.Store, "跳蚤市场") },
+            { Icon(Icons.Outlined.ShoppingBasket, "跳蚤市场") },
             true
         )
 
@@ -36,7 +52,7 @@ sealed class Screen(
         Screen(
             "/forum",
             "论坛",
-            { Icon(Icons.Filled.Forum, "论坛") },
+            { Icon(Icons.Outlined.Forum, "论坛") },
             true
         )
 
@@ -58,22 +74,24 @@ sealed class Screen(
                     )
                 }
             },
-            false
+            true
         )
 
     object LostFound :
         Screen(
             "/lostfound",
             "失物招领",
-            { Icon(Icons.Filled.Flag, "失物招领") },
-            true
+            { Icon(Icons.Outlined.ImageSearch, "失物招领") },
+            true,
+            false,
         )
 
     object Profile :
         Screen(
             "/profile",
             "个人中心",
-            { Icon(Icons.Filled.Person, "个人中心") },
-            true
+            { Icon(Icons.Outlined.Person, "个人中心") },
+            true,
+            false
         )
 }

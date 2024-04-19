@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +27,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,14 +36,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import xyz.qumn.alumnihub_app.AluSnackbarHost
+import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.ImgGrid
 import xyz.qumn.alumnihub_app.screen.forum.module.Post
@@ -57,7 +59,12 @@ import java.time.LocalDateTime
 @Composable
 fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
     val postPage = PostApi.page(PostPageParam())
-    Scaffold {
+    Scaffold(
+        snackbarHost = { AluSnackbarHost() },
+        contentWindowInsets = ScaffoldDefaults
+            .contentWindowInsets
+            .exclude(WindowInsets.navigationBars)
+    ) {
         Column(Modifier.padding(it)) {
             LazyColumn(Modifier.background(Color.White)) {
                 items(postPage.list.size) { idx ->
@@ -190,8 +197,10 @@ fun IconTextButton(
 @Preview
 @Composable
 fun ForumScreenPreview() {
-    Alumnihub_appTheme {
-        ForumScreen() {}
+    AppState.ProvideAppState {
+        Alumnihub_appTheme {
+            ForumScreen() {}
+        }
     }
 }
 
@@ -226,23 +235,3 @@ fun PostItemPreview() {
         ) {}
     }
 }
-
-fun Modifier.firstBaselineToTop(
-    firstBaselineToTop: Dp,
-) = layout { measurable, constraints ->
-    // Measure the composable
-    val placeable = measurable.measure(constraints)
-
-    // Check the composable has a first baseline
-    check(placeable[FirstBaseline] != AlignmentLine.Unspecified)
-    val firstBaseline = placeable[FirstBaseline]
-
-    // Height of the composable with padding - first baseline
-    val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
-    val height = placeable.height + placeableY
-    layout(placeable.width, height) {
-        // Where the composable gets placed
-        placeable.placeRelative(0, placeableY)
-    }
-}
-

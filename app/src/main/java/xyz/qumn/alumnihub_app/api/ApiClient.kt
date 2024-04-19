@@ -30,7 +30,10 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import xyz.qumn.alumnihub_app.module.URL
 
-var token: String? = null
+object LoginUser {
+    var token: String? = null
+}
+
 
 object ApiClient {
 
@@ -73,9 +76,9 @@ object ApiClient {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             //add this accept() for accept Json Body or Raw Json as Request Body
             accept(ContentType.Application.Json)
-            Log.d("api-client", "current token $token")
-            if (token != null)
-                header("Authorization", "Bearer $token")
+            Log.d("api-client", "current token ${LoginUser.token}")
+            if (LoginUser.token != null)
+                header("Authorization", "Bearer ${LoginUser.token}")
         }
     }
 
@@ -130,7 +133,7 @@ object ApiClient {
                 })
             }).body<Rsp<URL>>().data
             inputStream.close()
-            Log.d("iamge", "upload: the image url $url")
+            Log.d("image", "upload: the image url $url")
             url!!
         }
     }

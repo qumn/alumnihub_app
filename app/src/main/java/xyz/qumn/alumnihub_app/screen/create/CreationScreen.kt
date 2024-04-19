@@ -18,7 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.screen.fleamarket.CreateTradePage
 import xyz.qumn.alumnihub_app.screen.forum.CreateFormPage
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
@@ -46,7 +47,7 @@ fun CreateScreen(onClickClose: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val selectedTabIndex by remember { derivedStateOf { pagerState.currentPage } }
     Scaffold(
-        topBar = { topBar(pagerState, titles, selectedTabIndex, onClickClose) },
+        topBar = { TopBar(pagerState, titles, selectedTabIndex, onClickClose) },
     ) {
         Column(
             Modifier
@@ -68,7 +69,7 @@ fun CreateScreen(onClickClose: () -> Unit) {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-private fun topBar(
+private fun TopBar(
     pagerState: PagerState,
     titles: List<String>,
     selectedTabIndex: Int,
@@ -88,10 +89,10 @@ private fun topBar(
                     .padding(26.dp, 0.dp),
                 divider = {},
                 indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
+                    SecondaryIndicator(
                         Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
                         height = 4.dp,
-                        color = Blue80.copy(.3f),
+                        color = Blue80.copy(.3f)
                     )
                 }) {
                 titles.forEachIndexed { idx, title ->
@@ -121,7 +122,9 @@ private fun topBar(
 @Preview
 @Composable
 fun CreateScreenPreview() {
-    Alumnihub_appTheme {
-        CreateScreen {}
+    AppState.ProvideAppState {
+        Alumnihub_appTheme {
+            CreateScreen {}
+        }
     }
 }

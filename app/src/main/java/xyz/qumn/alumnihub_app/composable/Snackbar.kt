@@ -21,7 +21,7 @@ fun useSnack(): SnackbarHelper {
 
     if (msg.value != null) {
         LaunchedEffect(Unit) {
-            snackHostState?.showSnackbar(msg.value!!)
+            snackHostState.showSnackbar(msg.value!!)
             msg.value = null
         }
     }
