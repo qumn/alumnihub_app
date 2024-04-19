@@ -192,14 +192,15 @@ fun ConversationContent(
                 scrollBehavior = scrollBehavior,
             )
         },
+        bottomBar = { },
         // Exclude ime and navigation bar padding so this can be added by the UserInput composable
-        contentWindowInsets = WindowInsets(0.dp),
+        contentWindowInsets = ScaffoldDefaults
+            .contentWindowInsets
+            .exclude(WindowInsets.navigationBars)
+            .exclude(WindowInsets.ime),
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)) {
+        Column(Modifier.padding(paddingValues)) {
             Messages(
                 messages = uiState.messages,
                 navigateToProfile = navigateToProfile,
@@ -344,7 +345,7 @@ fun Messages(
         val jumpToBottomButtonEnabled by remember {
             derivedStateOf {
                 scrollState.firstVisibleItemIndex != 0 ||
-                    scrollState.firstVisibleItemScrollOffset > jumpThreshold
+                        scrollState.firstVisibleItemScrollOffset > jumpThreshold
             }
         }
 
@@ -557,6 +558,7 @@ fun ClickableMessage(
         }
     )
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JetchatAppBar(
@@ -582,6 +584,7 @@ fun JetchatAppBar(
         }
     )
 }
+
 @Composable
 fun JetchatIcon(
     contentDescription: String?,
@@ -610,7 +613,6 @@ fun JetchatIcon(
 }
 
 
-
 @Preview
 @Composable
 fun ConversationPreview() {
@@ -629,7 +631,6 @@ fun ChannelBarPrev() {
         ChannelNameBar(channelName = "composers", channelMembers = 52)
     }
 }
-
 
 
 @Preview

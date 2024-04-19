@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -69,6 +72,7 @@ fun PostDetailScreen(pid: Long?, onClickBack: () -> Unit) {
         bottomBar = { BottomBar() },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets
             .exclude(WindowInsets.ime)
+            .exclude(WindowInsets.navigationBars)
     ) {
         LazyColumn(Modifier.padding(it)) {
             item {
@@ -147,7 +151,16 @@ fun BottomBar() {
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        UserInput(onMessageSent = {})
+
+        UserInput(
+            onMessageSent = {},
+            resetScroll = {},
+            // let this element handle the padding so that the elevation is shown behind the
+            // navigation bar
+            modifier = Modifier
+                .navigationBarsPadding()
+                .imePadding()
+        )
 //        CompactField(
 //            value = comment,
 //            onValueChange = { comment = it },
