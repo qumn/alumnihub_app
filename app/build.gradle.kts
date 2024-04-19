@@ -53,6 +53,7 @@ android {
 
 val googleAccompanistVersion = "0.32.0"
 val ktorVersion = "2.3.10"
+val pagingVersion = "3.2.1"
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.0")
@@ -88,5 +89,6 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("androidx.compose.ui:ui-text-google-fonts")
-
+    implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
+    implementation("androidx.paging:paging-compose:$pagingVersion")
 }
