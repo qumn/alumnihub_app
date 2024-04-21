@@ -20,6 +20,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.http.ContentType
@@ -29,18 +30,20 @@ import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import xyz.qumn.alumnihub_app.module.URL
+import xyz.qumn.alumnihub_app.req.Page
+import xyz.qumn.alumnihub_app.req.PageParam
+import kotlin.reflect.full.memberProperties
 
 object LoginUser {
-    var token: String? = null
+    var token: String? = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjI2ODE1NDc4NTAyNDEyMjg4IiwidW5hIjoicXVtbiIsImV4cCI6MTcxNDI4MTAzMn0.o90ihTPcU-b-eBaspJ0BVOJE88IJzRQDBQjRe_vXURc"
 }
 
 
 object ApiClient {
-
     //Configure the HttpCLient
     val client = HttpClient(Android) {
         defaultRequest {
-            host = "192.168.10.48"
+            host = "192.168.124.9"
             port = 8080
             url {
                 protocol = URLProtocol.HTTP
@@ -86,7 +89,7 @@ object ApiClient {
         uri: String,
         block: HttpRequestBuilder.() -> Unit = {}
     ): Result<T> {
-        return runCatching { client.get(uri).body<Rsp<T>>().data!! }.onFailure {
+        return runCatching { client.get(uri, block).body<Rsp<T>>().data!! }.onFailure {
             Log.e("api", "get: ${it.message}")
         }
     }
@@ -98,6 +101,25 @@ object ApiClient {
         return runCatching { client.post(uri, block).body<Rsp<T>>().data!! }.onFailure {
             Log.e("api", "post: ${it.message}")
         }
+    }
+
+    suspend inline fun <reified R, reified P : PageParam> page(
+        uri: String,
+        params: P
+    ): Page<R> {
+        val paramsMap =
+            P::class.memberProperties.filter { it.get(params) != null }.associate { prop ->
+                prop.name to prop.get(params)
+            }
+        val page =
+            runCatching {
+                client.get(uri) {
+                    for (entry in paramsMap) {
+                        parameter(entry.key, entry.value)
+                    }
+                }.body<Rsp<Page<R>>>().data!!
+            }.getOrElse { Page.empty() }
+        return page
     }
 
     suspend inline fun <reified T> put(

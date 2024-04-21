@@ -1,7 +1,10 @@
 package xyz.qumn.alumnihub_app.screen.forum.module
 
-import java.time.LocalDateTime
+import kotlinx.serialization.Serializable
+import xyz.qumn.alumnihub_app.api.InstantSerializer
+import java.time.Instant
 
+@Serializable
 data class Post(
     val id: Long,
     val creator: Long,
@@ -9,7 +12,8 @@ data class Post(
     val creatorAvatar: String,
     val title: String,
     val content: String,
-    val createdAt: LocalDateTime,
+    @Serializable(with = InstantSerializer::class)
+    val createdAt: Instant,
     val tags: List<String>,
     val imgs: List<String> = emptyList(),
     val thumbUpCount: Int,

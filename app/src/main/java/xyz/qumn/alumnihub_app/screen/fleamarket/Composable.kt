@@ -9,12 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.math.BigDecimal
 
 @Composable
 fun PriceInfo(
     modifier: Modifier = Modifier,
-    price: BigDecimal,
+    priceInCent: Int,
     accentColor: Color = Color(255, 165, 0),
 ) {
     Row(modifier = modifier) {
@@ -26,10 +25,21 @@ fun PriceInfo(
         )
         Spacer(modifier = Modifier.width(1.dp))
         Text(
-            price.toString(),
+            convertPriceToYuan(priceInCent),
             Modifier.alignByBaseline(),
             style = MaterialTheme.typography.titleLarge,
             color = accentColor
         )
     }
+}
+
+
+fun convertPriceToYuan(priceInCent: Int): String {
+    val yuan = priceInCent / 100 // 分转换为元
+    val fen = priceInCent % 100 // 余下的分
+
+    // 格式化字符串，保留两位小数
+    val formattedFen = if (fen < 10) "0$fen" else fen.toString()
+
+    return "$yuan.$formattedFen 元"
 }

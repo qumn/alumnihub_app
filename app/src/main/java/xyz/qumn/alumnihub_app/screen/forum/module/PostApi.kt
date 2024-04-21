@@ -1,18 +1,20 @@
 package xyz.qumn.alumnihub_app.screen.forum.module
 
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import io.ktor.client.request.setBody
 import kotlinx.serialization.Serializable
 import xyz.qumn.alumnihub_app.api.ApiClient
 import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.req.Page
 import xyz.qumn.alumnihub_app.req.PageParam
-import xyz.qumn.alumnihub_app.req.PageRst
 import java.time.LocalDateTime
 
 
-data class PostPageParam(
-    override var pageSize: Int = 10,
-    override var lastId: Long = 0
+class PostPageParam(
+    override val pageNo: Int = 1,
+    override val pageSize: Int = 10
 ) : PageParam
 
 @Serializable
@@ -22,95 +24,36 @@ data class PostCreateReq(
     val imgs: List<String> = emptyList(),
 )
 
-object PostApi
+object PostApi {
+    suspend fun createNewPost(post: PostCreateReq): Result<Long> =
+        ApiClient.post("/posts") {
+            setBody(post)
+        }
 
-suspend fun PostApi.createNewPost(post: PostCreateReq): Result<Long> {
-    return ApiClient.post("/posts") {
-        setBody(post)
-    }
+    suspend fun page(postPageParam: PostPageParam): Page<Post> =
+        ApiClient.page("/posts/search", postPageParam)
+
+    suspend fun queryBy(id: Long): Result<Post> =
+        ApiClient.get("/posts/${id}")
 }
 
-fun PostApi.page(postPageParam: PostPageParam): PageRst<Post> {
-    return PageRst.of(
-        listOf(
-            Post(
-                id = 1,
-                creator = 1L,
-                creatorName = "Creator 1",
-                creatorAvatar = "https://example.com/avatar1.png",
-                title = "Post 1",
-                content = "This is the content of Post 1",
-                createdAt = LocalDateTime.now(),
-                tags = listOf("tag1", "tag2"),
-                thumbUpCount = 10,
-                commentCount = 5,
-                shareCount = 2,
-                imgs = listOf(
-                    "https://picsum.photos/200/300",
-                ),
-            ),
-            Post(
-                id = 2,
-                creator = 2L,
-                creatorName = "Creator 2",
-                creatorAvatar = "https://example.com/avatar2.png",
-                title = "Post 2",
-                content = "This is the content of Post 2",
-                createdAt = LocalDateTime.now(),
-                tags = listOf("tag3", "tag4"),
-                thumbUpCount = 20,
-                commentCount = 10,
-                shareCount = 4,
-                imgs = listOf(
-                    "https://picsum.photos/200/300",
-                    "https://picsum.photos/300/300",
-                    "https://picsum.photos/400/300",
-                ),
-            ),
-            Post(
-                id = 3,
-                creator = 3L,
-                creatorName = "Creator 3",
-                creatorAvatar = "https://example.com/avatar3.png",
-                title = "Post 3",
-                content = "This is the content of Post 3",
-                createdAt = LocalDateTime.now(),
-                tags = listOf("tag5", "tag6"),
-                thumbUpCount = 30,
-                commentCount = 15,
-                shareCount = 6,
-                imgs = listOf(
-                    "https://picsum.photos/200/300",
-                    "https://picsum.photos/300/300",
-                    "https://picsum.photos/400/300",
-                    "https://picsum.photos/400/400",
-                ),
+object PostPagingSource : PagingSource<Int, Post>() {
+    override fun getRefreshKey(state: PagingState<Int, Post>): Int? =
+        state.anchorPosition
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
+        val page = params.key ?: 1
+        val postPage = PostApi.page(PostPageParam(page))
+        return try {
+            LoadResult.Page(
+                data = postPage.list,
+                prevKey = if (page == 1) null else page.minus(1),
+                nextKey = if (postPage.list.isEmpty()) null else page.plus(1)
             )
-        )
-    )
-}
-
-fun PostApi.getById(id: Long): Post {
-    return Post(
-        1,
-        1,
-        "张三",
-        "https://placekitten.com/201/287",
-        "锚定发展目标 明晰落实举措 展现更大作为——学校干部职工谈落实春季干部大会精神",
-        "When naming variables in your code, it's best to be descriptive and precise about what the variable represents. For example, thumbUps or likeCount could both represent the number of thumbs-up or likes that a post or comment has received. Here",
-        LocalDateTime.now(),
-        tags = listOf("键盘", "科技"),
-        imgs = listOf(
-            "https://placekitten.com/201/287",
-            "https://placekitten.com/201/287",
-            "https://placekitten.com/201/287",
-            "https://placekitten.com/201/287",
-            "https://placekitten.com/201/287",
-        ),
-        thumbUpCount = 302,
-        commentCount = 64,
-        shareCount = 22,
-    )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
 }
 
 fun PostApi.getComments(pid: Long): List<Comment> {

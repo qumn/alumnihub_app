@@ -40,25 +40,58 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.ImgGrid
 import xyz.qumn.alumnihub_app.screen.forum.module.Post
-import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
-import xyz.qumn.alumnihub_app.screen.forum.module.PostPageParam
-import xyz.qumn.alumnihub_app.screen.forum.module.page
+import xyz.qumn.alumnihub_app.screen.forum.module.PostPagingSource
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue80
 import xyz.qumn.alumnihub_app.ui.theme.Gray20
 import xyz.qumn.alumnihub_app.ui.theme.Gray50
 import xyz.qumn.alumnihub_app.ui.theme.Gray80
 import xyz.qumn.alumnihub_app.util.toViewFormat
-import java.time.LocalDateTime
+import java.time.Instant
+
+
+class ForumViewModel : ViewModel() {
+    private val _postRsp: MutableStateFlow<PagingData<Post>> =
+        MutableStateFlow(PagingData.empty())
+    var postRsp = _postRsp.asStateFlow()
+        private set
+
+    init {
+        viewModelScope.launch {
+            Pager(
+                config = PagingConfig(10, enablePlaceholders = true)
+            ) {
+                PostPagingSource
+            }.flow.cachedIn(viewModelScope).collect {
+                _postRsp.value = it
+            }
+        }
+    }
+}
 
 @Composable
-fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
-    val postPage = PostApi.page(PostPageParam())
+fun ForumScreen(
+    forumViewModel: ForumViewModel = viewModel(),
+    onClickPostCard: (postId: Long) -> Unit
+) {
+    val postPage = forumViewModel.postRsp.collectAsLazyPagingItems()
+
     Scaffold(
         snackbarHost = { AluSnackbarHost() },
         contentWindowInsets = ScaffoldDefaults
@@ -67,13 +100,17 @@ fun ForumScreen(onClickPostCard: (postId: Long) -> Unit) {
     ) {
         Column(Modifier.padding(it)) {
             LazyColumn(Modifier.background(Color.White)) {
-                items(postPage.list.size) { idx ->
-                    val post = postPage.list[idx]
+                items(postPage.itemCount) { idx ->
+                    val post = postPage[idx]
+                    if (post == null) {
+                        Text(text = "no post to show")
+                        return@items
+                    }
                     Log.d("post", post.toString())
                     PostItem(Modifier, post = post) {
                         onClickPostCard(post.id)
                     }
-                    if (idx != postPage.list.size - 1) { // not last, draw a divider
+                    if (idx != postPage.itemCount - 1) { // not last, draw a divider
                         Divider(
                             color = Gray50,
                             thickness = 1.6.dp,
@@ -214,7 +251,7 @@ fun PostItemPreview() {
         "https://placekitten.com/201/287",
         "锚定发展目标 明晰落实举措 展现更大作为——学校干部职工谈落实春季干部大会精神",
         "When naming variables in your code, it's best to be descriptive and precise about what the variable represents. For example, thumbUps or likeCount could both represent the number of thumbs-up or likes that a post or comment has received. Here",
-        LocalDateTime.now(),
+        Instant.now(),
         tags = listOf("键盘", "科技"),
         imgs = listOf(
             "https://placekitten.com/201/287",

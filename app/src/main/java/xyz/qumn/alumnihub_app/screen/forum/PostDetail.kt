@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
@@ -35,9 +36,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.CompactField
@@ -62,7 +68,6 @@ import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.screen.forum.module.Comment
 import xyz.qumn.alumnihub_app.screen.forum.module.Post
 import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
-import xyz.qumn.alumnihub_app.screen.forum.module.getById
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue90
 import xyz.qumn.alumnihub_app.ui.theme.Gray60
@@ -72,35 +77,71 @@ import java.time.LocalDateTime
 
 @Composable
 fun PostDetailScreen(pid: Long?, onClickBack: () -> Unit) {
-    // get the post
-    val titleStyle = MaterialTheme.typography.titleMedium
-    val post = PostApi.getById(pid!!)
+    var isLoading: Boolean by remember { mutableStateOf(true) }
+    var titleMsg: String by remember { mutableStateOf("加载中") }
+    var post: Post? by remember { mutableStateOf(null) }
+    SideEffect {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (pid == null) return@launch
+            PostApi.queryBy(pid).onSuccess {
+                post = it
+                titleMsg = it.title
+            }.onFailure {
+                titleMsg = "帖子找不到了"
+            }
+            isLoading = false
+        }
+    }
     Scaffold(
-        topBar = { TopBar(title = post.title, onClickBack) },
+        topBar = { TopBar(title = titleMsg, onClickBack) },
         bottomBar = { BottomBar() },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets
             .exclude(WindowInsets.ime)
             .exclude(WindowInsets.navigationBars)
     ) {
-        LazyColumn(Modifier.padding(it)) {
-            item {
-                Text(post.title, style = titleStyle)
-            }
-            item {
-                CreatorInfo(post = post)
-            }
-            item {
-                Text(text = post.content)
-            }
-            items(post.imgs) { img ->
-                Image(img)
-            }
-            item {
-                CommentView(comments = post.comments)
+        Surface(modifier = Modifier.padding(it)) {
+            if (post == null) {
+                NotFound(titleMsg)
+            } else {
+                PostDetailContent(post!!)
             }
         }
     }
 
+}
+
+@Composable
+private fun PostDetailContent(post: Post) {
+    val titleStyle = MaterialTheme.typography.titleMedium
+    LazyColumn {
+        item {
+            Text(post.title, style = titleStyle)
+        }
+        item {
+            CreatorInfo(post = post)
+        }
+        item {
+            Text(text = post.content)
+        }
+        items(post.imgs) { img ->
+            Image(img)
+        }
+        item {
+            CommentView(comments = post.comments)
+        }
+    }
+}
+
+@Composable
+private fun NotFound(msg: String) {
+    val textStyle = MaterialTheme.typography.titleLarge
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(msg, style = textStyle)
+    }
 }
 
 @Composable

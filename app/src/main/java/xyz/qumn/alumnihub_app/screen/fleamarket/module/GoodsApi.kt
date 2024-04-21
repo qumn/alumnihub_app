@@ -1,21 +1,17 @@
-package xyz.qumn.alumnihub_app.screen.fleamarket;
+package xyz.qumn.alumnihub_app.screen.fleamarket.module;
 
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import io.ktor.client.request.setBody
 import kotlinx.serialization.Serializable
 import xyz.qumn.alumnihub_app.api.ApiClient
 import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.req.Page
 import xyz.qumn.alumnihub_app.req.PageParam
-import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsDetail
-import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsOverview
-import java.math.BigDecimal
 import kotlin.random.Random
 
-data class GoodsPageParam(
-    override var pageSize: Int = 10,
-    override var lastId: Long = 0
-) : PageParam
 
 @Serializable
 data class CreateGoodsReq(
@@ -23,6 +19,32 @@ data class CreateGoodsReq(
     val imgs: List<String> = emptyList(),
     val price: String,
 )
+
+@Serializable
+class GoodsPageParam(
+    override val pageNo: Int = 1,
+    override val pageSize: Int = 10,
+) : PageParam
+
+object GoodsPagingSource : PagingSource<Int, GoodsOverview>() {
+    override fun getRefreshKey(state: PagingState<Int, GoodsOverview>): Int? =
+        state.anchorPosition
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GoodsOverview> {
+        val pageNo = params.key ?: 1
+        val goodsPage = GoodsApi.page(GoodsPageParam(pageNo))
+        return try {
+            LoadResult.Page(
+                data = goodsPage.list,
+                prevKey = if (pageNo == 1) null else pageNo.minus(1),
+                nextKey = if (goodsPage.list.isEmpty()) null else pageNo.plus(1)
+            )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
+
+}
 
 object GoodsApi {
     suspend fun publish(
@@ -41,23 +63,9 @@ object GoodsApi {
         }
     }
 
-    fun page(pageParam: GoodsPageParam): List<GoodsOverview> {
-        val goods = mutableListOf<GoodsOverview>()
-        for (i in 1..pageParam.pageSize) {
-            goods.add(
-                GoodsOverview(
-                    id = 1,
-                    name = "GTX 1060Ti",
-                    cover = randomCover(),
-                    price = BigDecimal.valueOf(99.99),
-                    sellerId = 1,
-                    sellerAvatar = "https://placekitten.com/200/287",
-                    sellerName = "Seller"
-                )
-            )
-        }
-        return goods
-    }
+    suspend fun page(param: GoodsPageParam): Page<GoodsOverview> =
+        ApiClient.page("/trades/search", param)
+
 
     fun get(id: Long): GoodsDetail {
         return GoodsDetail(
@@ -68,7 +76,7 @@ object GoodsApi {
                 "https://picsum.photos/200/300",
                 "https://picsum.photos/200/300"
             ),
-            100.toBigDecimal(),
+            10000,
             User(
                 1L,
                 "name",

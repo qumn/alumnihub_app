@@ -89,6 +89,8 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("androidx.compose.ui:ui-text-google-fonts")
+    implementation("androidx.paging:paging-common-ktx:3.2.1")
     implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
     implementation("androidx.paging:paging-compose:$pagingVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.23")
 }

@@ -1,6 +1,8 @@
 package xyz.qumn.alumnihub_app.util
 
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 val FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -23,3 +25,8 @@ fun LocalDateTime.toViewFormat(): String {
         this.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     }
 }
+
+fun Instant.toViewFormat(): String =
+    LocalDateTime.ofInstant(this, ZoneId.systemDefault()).toViewFormat()
+
+

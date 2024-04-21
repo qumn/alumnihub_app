@@ -36,6 +36,7 @@ import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.SlidingCarousel
 import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsApi
 
 @Composable
 fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: () -> Unit) {
@@ -67,7 +68,8 @@ fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: (
             )
             Text(goods.name, style = titleStyle)
             PriceInfo(
-                price = goods.price, modifier = Modifier
+                priceInCent = goods.price,
+                modifier = Modifier
                     .align(Alignment.End)
                     .padding(16.dp, 8.dp)
             )
