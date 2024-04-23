@@ -48,9 +48,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.Avatar
@@ -73,7 +75,7 @@ class ForumViewModel : ViewModel() {
         private set
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Pager(
                 config = PagingConfig(10, enablePlaceholders = true)
             ) {

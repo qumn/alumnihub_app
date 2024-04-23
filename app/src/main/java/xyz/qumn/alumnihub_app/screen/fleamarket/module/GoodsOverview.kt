@@ -1,10 +1,7 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket.module;
 
 import kotlinx.serialization.Serializable
-import xyz.qumn.alumnihub_app.api.BigDecimalSerializer
-import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.module.User
-import java.math.BigDecimal
 
 @Serializable
 data class GoodsOverview(
@@ -17,11 +14,15 @@ data class GoodsOverview(
     val sellerName: String,
 )
 
-data class GoodsDetail(
-    val name: String,
+@Serializable
+data class TradeDetails(
+    val seller: User,
+    val goods: Goods,
+)
+
+@Serializable
+data class Goods(
     val desc: String,
     val imgs: List<String>,
     val price: Int,
-
-    val seller: User,
 )

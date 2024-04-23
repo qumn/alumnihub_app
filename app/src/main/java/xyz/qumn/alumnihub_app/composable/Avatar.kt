@@ -22,6 +22,6 @@ fun Avatar(
         contentScale = ContentScale.Crop,
         contentDescription = "seller avatar",
         placeholder = painterResource(id = R.drawable.placeholder),
-        error = painterResource(id = R.drawable.placeholder),
+        error = painterResource(id = R.drawable.avatar2),
     )
 }

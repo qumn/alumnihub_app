@@ -5,9 +5,7 @@ import androidx.paging.PagingState
 import io.ktor.client.request.setBody
 import kotlinx.serialization.Serializable
 import xyz.qumn.alumnihub_app.api.ApiClient
-import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.URL
-import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.req.Page
 import xyz.qumn.alumnihub_app.req.PageParam
 import kotlin.random.Random
@@ -66,28 +64,32 @@ object GoodsApi {
     suspend fun page(param: GoodsPageParam): Page<GoodsOverview> =
         ApiClient.page("/trades/search", param)
 
+    suspend fun get(id: Long) : Result<TradeDetails> =
+        ApiClient.get("/trades/${id}")
 
-    fun get(id: Long): GoodsDetail {
-        return GoodsDetail(
-            "name",
-            desc = "desc desc desc desc desc desc desc desc desc desc desc desc desc desc ",
-            listOf(
-                "https://picsum.photos/200/300",
-                "https://picsum.photos/200/300",
-                "https://picsum.photos/200/300"
-            ),
-            10000,
-            User(
-                1L,
-                "name",
-                avatar = "https://picsum.photos/201/300",
-                Gender.UNKNOWN,
-                null,
-                "",
-                ""
-            )
-        )
-    }
+
+
+//    fun get(id: Long): GoodsDetail {
+//        return GoodsDetail(
+//            "name",
+//            desc = "desc desc desc desc desc desc desc desc desc desc desc desc desc desc ",
+//            listOf(
+//                "https://picsum.photos/200/300",
+//                "https://picsum.photos/200/300",
+//                "https://picsum.photos/200/300"
+//            ),
+//            10000,
+//            User(
+//                1L,
+//                "name",
+//                avatar = "https://picsum.photos/201/300",
+//                Gender.UNKNOWN,
+//                null,
+//                "",
+//                ""
+//            )
+//        )
+//    }
 }
 
 

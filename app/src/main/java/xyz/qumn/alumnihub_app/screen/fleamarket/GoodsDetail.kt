@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,11 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,15 +40,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.composable.Avatar
+import xyz.qumn.alumnihub_app.composable.DotsPulsing
 import xyz.qumn.alumnihub_app.composable.SlidingCarousel
 import xyz.qumn.alumnihub_app.module.User
+import xyz.qumn.alumnihub_app.screen.fleamarket.module.Goods
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsApi
+import xyz.qumn.alumnihub_app.screen.fleamarket.module.TradeDetails
 
 @Composable
 fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: () -> Unit) {
-    val goods = GoodsApi.get(tradeId!!)
+    var isLoading by remember { mutableStateOf(true) }
+    var goodsRst by remember { mutableStateOf<Result<TradeDetails>?>(null) }
 
-    val titleStyle = MaterialTheme.typography.titleLarge
+    LaunchedEffect(Unit) {
+        goodsRst = GoodsApi.get(tradeId!!)
+        isLoading = false
+    }
+
 
     Scaffold(
         topBar = {
@@ -56,28 +70,72 @@ fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: (
             .contentWindowInsets
             .exclude(WindowInsets.navigationBars)
     ) {
-        Column(Modifier.padding(it)) {
-            Row(Modifier.padding(16.dp, 4.dp)) {
-                SellerInfo(seller = goods.seller)
+        Column(
+            Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
+            if (isLoading) {
+                Loading()
+                return@Scaffold
             }
-            SlidingCarousel(
-                images = goods.imgs,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16 / 9f)
-            )
-            Text(goods.name, style = titleStyle)
-            PriceInfo(
-                priceInCent = goods.price,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(16.dp, 8.dp)
-            )
-            Text(goods.desc, style = titleStyle)
+            goodsRst!!.onSuccess {
+                DetailCompose(it.seller, it.goods)
+            }.onFailure {
+                NotFound(msg = "宝贝不见了")
+            }
+
         }
     }
-
 }
+
+@Composable
+private fun DetailCompose(seller: User, goods: Goods) {
+    val titleStyle = MaterialTheme.typography.titleLarge
+    Column {
+        Row(Modifier.padding(16.dp, 4.dp)) {
+            SellerInfo(seller = seller)
+        }
+        SlidingCarousel(
+            images = goods.imgs,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16 / 9f)
+        )
+        Text(goods.desc, style = titleStyle)
+        PriceInfo(
+            priceInCent = goods.price,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp, 8.dp)
+        )
+    }
+}
+
+
+@Composable
+private fun Loading() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        DotsPulsing()
+    }
+}
+
+@Composable
+private fun NotFound(msg: String) {
+    val textStyle = MaterialTheme.typography.titleLarge
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(msg, style = textStyle)
+    }
+}
+
 
 @Composable
 fun SellerInfo(seller: User) {
