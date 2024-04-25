@@ -81,7 +81,7 @@ fun AlumnihubApp() {
             NavHost(
                 modifier = Modifier.weight(0.91f),
                 navController = navController,
-                startDestination = if (LoginUser.token == null) "/login" else Screen.FleaMarket.route,
+                startDestination = if (LoginUser.token == null) "/login?showBottom=false" else Screen.FleaMarket.route,
                 enterTransition = {
                     slideInHorizontally(
                         animationSpec = tween(300),
