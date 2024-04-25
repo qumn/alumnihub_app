@@ -9,7 +9,9 @@ import xyz.qumn.alumnihub_app.module.Gender
 import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.req.Page
 import xyz.qumn.alumnihub_app.req.PageParam
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
 class PostPageParam(
@@ -71,11 +73,11 @@ fun PostApi.getComments(pid: Long): List<Comment> {
         1L,
         "这是一条评论",
         commenter = user,
-        createAt = LocalDateTime.now(),
+        createAt = Instant.now(),
         replays = listOf(),
         thumpUpCount = 3
     )
-    val yeasDay = LocalDateTime.now().minusDays(1)
+    val yeasDay = Instant.now().minus(1, ChronoUnit.DAYS)
     val replay1 = comment.copy(replays = listOf(comment.copy(createAt = yeasDay), comment.copy()))
 
     comment = comment.copy(replays = listOf(replay1, comment.copy(), comment.copy()))

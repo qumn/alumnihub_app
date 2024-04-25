@@ -72,7 +72,9 @@ import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue90
 import xyz.qumn.alumnihub_app.ui.theme.Gray60
 import xyz.qumn.alumnihub_app.util.toViewFormat
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
 @Composable
@@ -276,7 +278,7 @@ fun CommentItem(comment: Comment, avatarSize: Int = 42, th: Int = -1) {
 
 @Composable
 fun Replays(replays: List<Comment>, expand: Boolean = false, onclick: () -> Unit) {
-    val showMoreStyle = MaterialTheme.typography.labelMedium.copy(color = Blue90)
+    val showMoreStyle = MaterialTheme.typography.labelMedium.copy(color = Gray60)
     val displayReplays = if (!expand) {
         replays.take(1)
     } else {
@@ -369,11 +371,11 @@ fun CommentItemPreview() {
         1L,
         "这是一条评论",
         commenter = user,
-        createAt = LocalDateTime.now(),
+        createAt = Instant.now(),
         replays = listOf(),
         thumpUpCount = 3
     )
-    val yeasDay = LocalDateTime.now().minusDays(1)
+    val yeasDay = Instant.now().minus(1, ChronoUnit.DAYS)
     val replay1 = comment.copy(replays = listOf(comment.copy(createAt = yeasDay), comment.copy()))
 
     comment = comment.copy(replays = listOf(replay1, comment.copy(), comment.copy()))

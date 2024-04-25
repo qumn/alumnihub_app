@@ -46,6 +46,7 @@ import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.Goods
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsApi
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.TradeDetails
+import xyz.qumn.alumnihub_app.screen.forum.CommentView
 
 @Composable
 fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: () -> Unit) {
@@ -79,8 +80,8 @@ fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: (
                 Loading()
                 return@Scaffold
             }
-            goodsRst!!.onSuccess {
-                DetailCompose(it.seller, it.goods)
+            goodsRst!!.onSuccess {trade ->
+                DetailCompose(trade)
             }.onFailure {
                 NotFound(msg = "宝贝不见了")
             }
@@ -90,8 +91,13 @@ fun TradeDetailScreen(tradeId: Long?, onClickBack: () -> Unit, toConversation: (
 }
 
 @Composable
-private fun DetailCompose(seller: User, goods: Goods) {
+private fun DetailCompose(trade: TradeDetails) {
+    val seller = trade.seller
+    val goods = trade.goods
     val titleStyle = MaterialTheme.typography.titleLarge
+    LaunchedEffect(Unit) {
+        trade.loadComments()
+    }
     Column {
         Row(Modifier.padding(16.dp, 4.dp)) {
             SellerInfo(seller = seller)
@@ -109,6 +115,8 @@ private fun DetailCompose(seller: User, goods: Goods) {
                 .align(Alignment.End)
                 .padding(16.dp, 8.dp)
         )
+
+        CommentView(comments = trade.comments)
     }
 }
 
