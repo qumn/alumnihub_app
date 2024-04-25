@@ -33,6 +33,7 @@ import xyz.qumn.alumnihub_app.screen.create.creation
 import xyz.qumn.alumnihub_app.screen.fleamarket.fleaMarket
 import xyz.qumn.alumnihub_app.screen.forum.forum
 import xyz.qumn.alumnihub_app.screen.login.login
+import xyz.qumn.alumnihub_app.screen.lostfound.lostfound
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -97,6 +98,7 @@ fun AlumnihubApp() {
                 fleaMarket(navController)
                 forum(navController)
                 creation(navController)
+                lostfound(navController)
             }
             AluBottomBar(Modifier.weight(0.09f))
         }

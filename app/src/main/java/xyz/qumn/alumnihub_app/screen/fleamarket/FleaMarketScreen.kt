@@ -68,7 +68,6 @@ class FleaMarketViewModel : ViewModel() {
             }
         }
     }
-
 }
 
 @Composable

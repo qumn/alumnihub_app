@@ -67,37 +67,4 @@ object GoodsApi {
     suspend fun get(id: Long) : Result<TradeDetails> =
         ApiClient.get("/trades/${id}")
 
-
-
-//    fun get(id: Long): GoodsDetail {
-//        return GoodsDetail(
-//            "name",
-//            desc = "desc desc desc desc desc desc desc desc desc desc desc desc desc desc ",
-//            listOf(
-//                "https://picsum.photos/200/300",
-//                "https://picsum.photos/200/300",
-//                "https://picsum.photos/200/300"
-//            ),
-//            10000,
-//            User(
-//                1L,
-//                "name",
-//                avatar = "https://picsum.photos/201/300",
-//                Gender.UNKNOWN,
-//                null,
-//                "",
-//                ""
-//            )
-//        )
-//    }
-}
-
-
-fun randomCover(): String {
-    val imgs = listOf(
-        "https://placehold.co/600x400/000000/FFFFFF/png",
-        "https://placehold.co/300x600/000000/FFFFFF/png",
-        "https://placehold.co/500x400/000000/FFFFFF/png"
-    )
-    return imgs[Random.nextInt(0, imgs.size)]
 }

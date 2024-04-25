@@ -79,11 +79,11 @@ sealed class Screen(
 
     object LostFound :
         Screen(
-            "/lostfound",
+            "/lost_found",
             "失物招领",
             { Icon(Icons.Outlined.ImageSearch, "失物招领") },
             true,
-            false,
+            true,
         )
 
     object Profile :
