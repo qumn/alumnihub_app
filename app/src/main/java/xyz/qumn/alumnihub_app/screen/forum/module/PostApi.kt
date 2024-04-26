@@ -6,11 +6,11 @@ import io.ktor.client.request.setBody
 import kotlinx.serialization.Serializable
 import xyz.qumn.alumnihub_app.api.ApiClient
 import xyz.qumn.alumnihub_app.module.Gender
+import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.module.User
 import xyz.qumn.alumnihub_app.req.Page
 import xyz.qumn.alumnihub_app.req.PageParam
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 
@@ -22,9 +22,32 @@ class PostPageParam(
 @Serializable
 data class PostCreateReq(
     val title: String,
-    val price: String,
-    val imgs: List<String> = emptyList(),
-)
+    val content: String,
+    val imgs: List<URL> = emptyList(),
+) {
+    companion object {
+        fun empty(): PostCreateReq =
+            PostCreateReq(
+                "",
+                "",
+                emptyList()
+            )
+
+    }
+
+    fun validate(): String? {
+        if (title.isBlank()){
+            return "标题不能为空"
+        }
+        if (content.isBlank()){
+            return "内容不能为空"
+        }
+        if (imgs.isEmpty()){
+            return "最少上传一个图片"
+        }
+        return null
+    }
+}
 
 object PostApi {
     suspend fun createNewPost(post: PostCreateReq): Result<Long> =
@@ -39,9 +62,14 @@ object PostApi {
         ApiClient.get("/posts/${id}")
 }
 
-object PostPagingSource : PagingSource<Int, Post>() {
-    override fun getRefreshKey(state: PagingState<Int, Post>): Int? =
-        state.anchorPosition
+class PostPagingSource : PagingSource<Int, Post>() {
+
+    override fun getRefreshKey(state: PagingState<Int, Post>): Int? {
+        return state.anchorPosition?.let {
+            val anchorPage = state.closestPageToPosition(it)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
+        }
+    }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
         val page = params.key ?: 1

@@ -3,6 +3,7 @@ package xyz.qumn.alumnihub_app.screen.fleamarket
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,7 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -34,12 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,7 +68,7 @@ class FleaMarketViewModel : ViewModel() {
             Pager(
                 config = PagingConfig(10, enablePlaceholders = true)
             ) {
-                GoodsPagingSource
+                GoodsPagingSource()
             }.flow.cachedIn(viewModelScope).collect {
                 _goodsRsp.value = it
             }
@@ -88,20 +94,54 @@ fun FleaMarketFlowScreen(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
-                contentPadding = PaddingValues(2.dp, 12.dp)
+            SwipeRefresh(
+                state = rememberSwipeRefreshState((goodsOverviews.loadState.refresh is LoadState.Loading && goodsOverviews.itemCount > 0)),
+                onRefresh = { goodsOverviews.refresh() },
             ) {
-                items(goodsOverviews.itemCount) { idx ->
-                    val goods = goodsOverviews[idx]
-                    if (goods == null) {
-                        Text("no goods to show")
-                        return@items
+
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    contentPadding = PaddingValues(2.dp, 12.dp)
+                ) {
+                    items(goodsOverviews.itemCount) { idx ->
+                        val goods = goodsOverviews[idx]
+                        if (goods == null) {
+                            Text("no goods to show")
+                            return@items
+                        }
+                        FleaMarketCard(
+                            goods = goods,
+                            onClickTradeCard = onClickTradeCard
+                        )
                     }
-                    FleaMarketCard(
-                        goods = goods,
-                        onClickTradeCard = onClickTradeCard
-                    )
+                    if (goodsOverviews.loadState.append is LoadState.Loading) {
+                        //下一页的load状态
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                            }
+                        }
+                    }
+                }
+
+            }
+            if (goodsOverviews.loadState.refresh is LoadState.Loading) {
+                if (goodsOverviews.itemCount == 0) {//第一次响应页面加载时的loading状态
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                    }
+                }
+            } else if (goodsOverviews.loadState.refresh is LoadState.Error) {
+                //加载失败的错误页面
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Button(modifier = Modifier.align(alignment = Alignment.Center),
+                        onClick = { goodsOverviews.refresh() }) {
+                        Text(text = "加载失败！请重试")
+                    }
                 }
             }
         }

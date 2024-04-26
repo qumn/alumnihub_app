@@ -24,9 +24,13 @@ class GoodsPageParam(
     override val pageSize: Int = 10,
 ) : PageParam
 
-object GoodsPagingSource : PagingSource<Int, GoodsOverview>() {
-    override fun getRefreshKey(state: PagingState<Int, GoodsOverview>): Int? =
-        state.anchorPosition
+class GoodsPagingSource : PagingSource<Int, GoodsOverview>() {
+    override fun getRefreshKey(state: PagingState<Int, GoodsOverview>): Int? {
+        return state.anchorPosition?.let {
+            val anchorPage = state.closestPageToPosition(it)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
+        }
+    }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GoodsOverview> {
         val pageNo = params.key ?: 1

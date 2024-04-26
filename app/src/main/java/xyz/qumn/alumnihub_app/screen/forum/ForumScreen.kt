@@ -4,11 +4,13 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -22,8 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,16 +47,18 @@ import androidx.compose.ui.unit.em
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.Avatar
@@ -79,7 +85,7 @@ class ForumViewModel : ViewModel() {
             Pager(
                 config = PagingConfig(10, enablePlaceholders = true)
             ) {
-                PostPagingSource
+                PostPagingSource()
             }.flow.cachedIn(viewModelScope).collect {
                 _postRsp.value = it
             }
@@ -100,26 +106,58 @@ fun ForumScreen(
             .contentWindowInsets
             .exclude(WindowInsets.navigationBars)
     ) {
-        Column(Modifier.padding(it)) {
-            LazyColumn(Modifier.background(Color.White)) {
-                items(postPage.itemCount) { idx ->
-                    val post = postPage[idx]
-                    if (post == null) {
-                        Text(text = "no post to show")
-                        return@items
-                    }
-                    Log.d("post", post.toString())
-                    PostItem(Modifier, post = post) {
-                        onClickPostCard(post.id)
-                    }
-                    if (idx != postPage.itemCount - 1) { // not last, draw a divider
-                        Divider(
-                            color = Gray50,
-                            thickness = 1.6.dp,
-                            modifier = Modifier.padding(20.dp, 3.dp)
-                        )
-                    }
+        SwipeRefresh(
+            state = rememberSwipeRefreshState((postPage.loadState.refresh is LoadState.Loading && postPage.itemCount > 0)),
+            onRefresh = { postPage.refresh() },
+        ) {
+            Column(Modifier.padding(it)) {
+                LazyColumn(Modifier.background(Color.White)) {
+                    items(postPage.itemCount) { idx ->
+                        val post = postPage[idx]
+                        if (post == null) {
+                            Text(text = "no post to show")
+                            return@items
+                        }
+                        Log.d("post", post.toString())
+                        PostItem(Modifier, post = post) {
+                            onClickPostCard(post.id)
+                        }
+                        if (idx != postPage.itemCount - 1) { // not last, draw a divider
+                            HorizontalDivider(
+                                modifier = Modifier.padding(20.dp, 3.dp),
+                                thickness = 1.6.dp,
+                                color = Gray50
+                            )
+                        }
 
+                    }
+                    if (postPage.loadState.append is LoadState.Loading) { //下一页的load状态
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (postPage.loadState.refresh is LoadState.Loading) {
+            if (postPage.itemCount == 0) {//第一次响应页面加载时的loading状态
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                }
+            }
+        } else if (postPage.loadState.refresh is LoadState.Error) {
+            //加载失败的错误页面
+            Box(modifier = Modifier.fillMaxSize()) {
+                Button(modifier = Modifier.align(alignment = Alignment.Center),
+                    onClick = { postPage.refresh() }) {
+                    Text(text = "加载失败！请重试")
                 }
             }
         }
