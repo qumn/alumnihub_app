@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -140,12 +143,21 @@ fun LostItemCompose(
                     )
                 }
                 Spacer(Modifier.height(4.dp))
-                Text(
-                    text = lostItem.publishAt.toViewFormat(),
+                Row(
                     Modifier
-                        .align(Alignment.End)
-                        .padding(20.dp, 12.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(20.dp, 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Row {
+                        Icon(Icons.Filled.LocationOn, contentDescription = null)
+                        Text(text = "凤雏食堂")
+                    }
+                    Text(
+                        text = lostItem.publishAt.toViewFormat(),
+                    )
+                }
             }
         }
     }

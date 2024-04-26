@@ -92,5 +92,6 @@ dependencies {
     implementation("androidx.paging:paging-common-ktx:3.2.1")
     implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
     implementation("androidx.paging:paging-compose:$pagingVersion")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.23.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.23")
 }

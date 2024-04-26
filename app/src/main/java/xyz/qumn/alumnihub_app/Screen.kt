@@ -83,7 +83,7 @@ sealed class Screen(
             "失物招领",
             { Icon(Icons.Outlined.ImageSearch, "失物招领") },
             true,
-            true,
+            false,
         )
 
     object Profile :
@@ -92,6 +92,6 @@ sealed class Screen(
             "个人中心",
             { Icon(Icons.Outlined.Person, "个人中心") },
             true,
-            false
+            true
         )
 }

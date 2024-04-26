@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.screen.fleamarket.CreateTradePage
 import xyz.qumn.alumnihub_app.screen.forum.CreateFormPage
+import xyz.qumn.alumnihub_app.screen.lostfound.PublishMissingItemPage
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 import xyz.qumn.alumnihub_app.ui.theme.Blue80
 
@@ -43,7 +44,7 @@ import xyz.qumn.alumnihub_app.ui.theme.Blue80
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CreateScreen(onClickClose: () -> Unit) {
-    val titles = listOf("发闲置", "发帖子")
+    val titles = listOf("发闲置", "发帖子", "发失物")
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val selectedTabIndex by remember { derivedStateOf { pagerState.currentPage } }
     Scaffold(
@@ -60,6 +61,8 @@ fun CreateScreen(onClickClose: () -> Unit) {
                     CreateTradePage { onClickClose() }
                 } else if (page == 1) {
                     CreateFormPage { onClickClose() }
+                } else if (page == 2) {
+                    PublishMissingItemPage { onClickClose() }
                 }
             }
         }
