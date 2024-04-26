@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.composable.CircularPulsatingIndicator
 import xyz.qumn.alumnihub_app.composable.ImgGridPicker
 import xyz.qumn.alumnihub_app.composable.SnackbarHelper
@@ -57,6 +58,7 @@ fun CreateTradePage(back: () -> Unit) {
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         floatingActionButton = { FloatingButton(desc, price, selectedImageUrl, back) },
+        snackbarHost = { AluSnackbarHost() },
         bottomBar = {  }
     ) {
         Column(
