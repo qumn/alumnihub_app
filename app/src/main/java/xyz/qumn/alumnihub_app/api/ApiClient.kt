@@ -43,7 +43,7 @@ object ApiClient {
     //Configure the HttpCLient
     val client = HttpClient(Android) {
         defaultRequest {
-            host = "192.168.10.48"
+            host = "192.168.124.9"
             port = 8080
             url {
                 protocol = URLProtocol.HTTP

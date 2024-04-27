@@ -9,6 +9,8 @@ data class LostItem(
     val id: Long,
     val img: String,
     val title: String,
+    val location: String,
+    val questions: List<String>,
 
     val publisherId: Long,
     val publisherAvatar: String,

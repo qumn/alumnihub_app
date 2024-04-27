@@ -2,7 +2,6 @@ package xyz.qumn.alumnihub_app.screen.lostfound
 
 import android.util.Log
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,8 +16,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.QuestionAnswer
 import androidx.compose.material.icons.outlined.QuestionMark
-import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,64 +25,53 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.CircularPulsatingIndicator
 import xyz.qumn.alumnihub_app.composable.ImgGridPicker
 import xyz.qumn.alumnihub_app.composable.useSnack
 import xyz.qumn.alumnihub_app.module.URL
+import xyz.qumn.alumnihub_app.screen.lostfound.module.LostItem
+import xyz.qumn.alumnihub_app.screen.lostfound.module.LostItemApi
+import xyz.qumn.alumnihub_app.screen.lostfound.module.PublishMissingItemReq
+import xyz.qumn.alumnihub_app.screen.lostfound.module.Question
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
-data class Question(
-    val content: String,
-    val answer: String,
-) {
-    companion object {
-        fun empty(): Question {
-            return Question("", "")
-        }
-    }
-}
-
-data class PublishMissingItemReq(
-    val name: String,
-    val location: String,
-    val questions: List<Question>,
-    val imgs: List<URL>
-) {
-    companion object {
-        fun empty(): PublishMissingItemReq =
-            PublishMissingItemReq("", "", emptyList(), emptyList())
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun PublishMissingItemPage(onClickBack: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val titlePlaceHolderTextStyle = MaterialTheme.typography.titleMedium
+    val selectedImageUrl = remember { mutableStateListOf<URL>() }
     var publishMissingItemReq by remember { mutableStateOf(PublishMissingItemReq.empty()) }
-    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
     var newQuestion by remember {
         mutableStateOf(Question.empty())
     }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        floatingActionButton = { FloatingButton(publishMissingItemReq, onClickBack) },
+        floatingActionButton = {
+            FloatingButton(
+                publishMissingItemReq.copy(imgs = selectedImageUrl.map { it.urn.name }),
+                onClickBack
+            )
+        },
         snackbarHost = { AluSnackbarHost() },
         bottomBar = { }
     ) {
@@ -94,74 +81,60 @@ fun PublishMissingItemPage(onClickBack: () -> Unit) {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val isFocused by interactionSource.collectIsFocusedAsState()
 
-            val titlePlaceHolderTextStyle = MaterialTheme.typography.titleMedium
-            val contentPlaceHolderTextStyle = MaterialTheme.typography.bodyMedium
+            Text(
+                "基本信息", style = MaterialTheme.typography.titleLarge, modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(12.dp)
+            )
+            Surface(modifier = Modifier.padding(12.dp)) {
+                Column {
 
-            TextField(
-                value = publishMissingItemReq.name,
-                onValueChange = { publishMissingItemReq = publishMissingItemReq.copy(name = it) },
-                suffix = {
-                    if (isFocused)
-                        Text(text = "${20 - publishMissingItemReq.name.length}")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        "输入物品名称",
-                        style = titlePlaceHolderTextStyle,
-                        color = Color.Black.copy(.6f)
+                    TextField(
+                        value = publishMissingItemReq.name,
+                        onValueChange = {
+                            publishMissingItemReq = publishMissingItemReq.copy(name = it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = {
+                            Text(
+                                "输入物品名称",
+                                style = titlePlaceHolderTextStyle,
+                                color = Color.Black.copy(.6f)
+                            )
+                        },
+                        interactionSource = interactionSource,
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
-                },
-                interactionSource = interactionSource,
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-            TextField(
-                value = publishMissingItemReq.location,
-                onValueChange = {
-                    publishMissingItemReq = publishMissingItemReq.copy(location = it)
-                },
-                suffix = {
-                    if (isFocused)
-                        Text(text = "${20 - publishMissingItemReq.location.length}")
-                },
-                modifier = Modifier.fillMaxWidth(),
-                prefix = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
-                placeholder = {
-                    Text(
-                        "物品拾取位置",
-                        style = titlePlaceHolderTextStyle,
-                        color = Color.Black.copy(.6f)
+                    TextField(
+                        value = publishMissingItemReq.location,
+                        onValueChange = {
+                            publishMissingItemReq = publishMissingItemReq.copy(location = it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        prefix = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
+                        placeholder = {
+                            Text(
+                                "物品拾取位置",
+                                style = titlePlaceHolderTextStyle,
+                                color = Color.Black.copy(.6f)
+                            )
+                        },
+                        interactionSource = interactionSource,
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
-                },
-                interactionSource = interactionSource,
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-            for (question in publishMissingItemReq.questions) {
-                Row {
-                    Icon(Icons.Outlined.QuestionMark, contentDescription = null)
-                    Text(text = question.content)
-                }
-                Row {
-                    Icon(Icons.Outlined.QuestionAnswer, contentDescription = null)
-                    Text(text = question.answer)
                 }
             }
-            Row {
-                TextField(
-                    value = newQuestion.content,
-                    onValueChange = { newQuestion = newQuestion.copy(content = it) })
-            }
+
+
             val tryAddQuestion = {
                 if (newQuestion.content.isNotEmpty() && newQuestion.answer.isNotEmpty()) {
                     publishMissingItemReq =
@@ -169,20 +142,70 @@ fun PublishMissingItemPage(onClickBack: () -> Unit) {
                     newQuestion = Question.empty()
                 }
             }
-            Row {
-                TextField(
-                    value = newQuestion.answer,
-                    onValueChange = { newQuestion = newQuestion.copy(answer = it) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { tryAddQuestion() }),
-                    modifier = Modifier
-                        .onFocusChanged {
-                            if (!it.isFocused) tryAddQuestion()
+
+            Text(
+                "问题", style = MaterialTheme.typography.titleLarge, modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(12.dp)
+            )
+            Surface(Modifier.padding(12.dp)) {
+                Column {
+                    for (question in publishMissingItemReq.questions) {
+                        Column(Modifier.padding(0.dp, 3.dp)) {
+                            Row(Modifier.fillMaxWidth()) {
+                                Icon(Icons.Outlined.QuestionMark, contentDescription = null)
+                                Text(text = question.content)
+                            }
+                            Row(Modifier.fillMaxWidth()) {
+                                Icon(Icons.Outlined.QuestionAnswer, contentDescription = null)
+                                Text(text = question.answer)
+                            }
                         }
-                )
+                    }
+                    TextField(
+                        value = newQuestion.content,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { newQuestion = newQuestion.copy(content = it) },
+                        placeholder = {
+                            Text(
+                                "问题描述",
+                                style = titlePlaceHolderTextStyle,
+                                color = Color.Black.copy(.6f)
+                            )
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            unfocusedContainerColor = Color.White
+                        )
+                    )
+                    TextField(
+                        value = newQuestion.answer,
+                        placeholder = {
+                            Text(
+                                "问题答案",
+                                style = titlePlaceHolderTextStyle,
+                                color = Color.Black.copy(.6f)
+                            )
+                        },
+                        onValueChange = { newQuestion = newQuestion.copy(answer = it) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { tryAddQuestion() }),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged {
+                                if (!it.isFocused) tryAddQuestion()
+                            },
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            unfocusedContainerColor = Color.White
+                        )
+                    )
+                }
             }
 
             Surface(Modifier.fillMaxSize()) {
@@ -193,15 +216,13 @@ fun PublishMissingItemPage(onClickBack: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ImgGridPicker(
-                        publishMissingItemReq.imgs,
+                        selectedImageUrl,
                         onImgAdd = { selectedImages ->
                             Log.d("ImgGridPicker", "ImagePicker: call the on change function")
-                            publishMissingItemReq =
-                                publishMissingItemReq.copy(imgs = publishMissingItemReq.imgs + selectedImages)
+                            selectedImageUrl.addAll(selectedImages)
                         },
                         onImgRemove = { idx ->
-                            publishMissingItemReq =
-                                publishMissingItemReq.copy(imgs = publishMissingItemReq.imgs.filterIndexed { i, _ -> idx != i })
+                            selectedImageUrl.removeAt(idx)
                         }
                     )
                 }
@@ -220,27 +241,27 @@ private fun FloatingButton(
 
     FloatingActionButton(
         onClick = {
-//            if (isLoading) return@FloatingActionButton
-//            val msg = publishMissingItemReq.validate()
-//            if (msg != null) {
-//                snackHelper.show(msg)
-//                return@FloatingActionButton
-//            }
-//            isLoading = true
-//            CoroutineScope(Dispatchers.IO).launch {
-//                PostApi.createNewPost(publishMissingItemReq).onSuccess {
-//                    CoroutineScope(Dispatchers.Main).launch {
-//                        isLoading = false
-//                        snackHelper.show("发布成功")
-//                        back()
-//                    }
-//                }.onFailure {
-//                    CoroutineScope(Dispatchers.Main).launch {
-//                        isLoading = false
-//                        snackHelper.show("网络波动, 请稍候再试")
-//                    }
-//                }
-//            }
+            if (isLoading) return@FloatingActionButton
+            val msg = publishMissingItemReq.validate()
+            if (msg != null) {
+                snackHelper.show(msg)
+                return@FloatingActionButton
+            }
+            isLoading = true
+            CoroutineScope(Dispatchers.IO).launch {
+                LostItemApi.publishMissingItem(publishMissingItemReq).onSuccess {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        isLoading = false
+                        snackHelper.show("发布成功")
+                        back()
+                    }
+                }.onFailure {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        isLoading = false
+                        snackHelper.show("网络波动, 请稍候再试")
+                    }
+                }
+            }
         },
         Modifier
             .imePadding()
@@ -252,6 +273,7 @@ private fun FloatingButton(
         }
     }
 }
+
 
 
 @Preview
