@@ -1,6 +1,7 @@
 package xyz.qumn.alumnihub_app.screen.fleamarket
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -51,10 +56,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
+import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.R
+import xyz.qumn.alumnihub_app.SearchApplicationBar
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsOverview
 import xyz.qumn.alumnihub_app.screen.fleamarket.module.GoodsPagingSource
+import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
+import xyz.qumn.alumnihub_app.ui.theme.Gray20
 
 class FleaMarketViewModel : ViewModel() {
     private val _goodsRsp: MutableStateFlow<PagingData<GoodsOverview>> =
@@ -82,8 +91,12 @@ fun FleaMarketFlowScreen(
     onClickTradeCard: (tradeId: Long) -> Unit
 ) {
     val goodsOverviews = fleaMarketViewModel.goodsRsp.collectAsLazyPagingItems()
+    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
+        topBar = {
+            SearchApplicationBar(value = searchText) { searchText = it }
+        },
         snackbarHost = { AluSnackbarHost() },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets
@@ -91,6 +104,7 @@ fun FleaMarketFlowScreen(
     ) {
         Column(
             Modifier
+                .background(Gray20)
                 .padding(it)
                 .fillMaxSize()
         ) {
@@ -229,7 +243,11 @@ fun FleaMarketCardPreview() {
 @Preview
 @Composable
 fun FleaMarketFlowPreview() {
-    FleaMarketFlowScreen {}
+    AppState.ProvideAppState {
+        Alumnihub_appTheme {
+            FleaMarketFlowScreen {}
+        }
+    }
 }
 
 @Preview
