@@ -23,7 +23,7 @@ class PostPageParam(
 data class PostCreateReq(
     val title: String,
     val content: String,
-    val imgs: List<URL> = emptyList(),
+    val imgs: List<String> = emptyList(),
 ) {
     companion object {
         fun empty(): PostCreateReq =

@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
+import xyz.qumn.alumnihub_app.LoadLoginUserInfo
 import xyz.qumn.alumnihub_app.R
 import xyz.qumn.alumnihub_app.SearchApplicationBar
 import xyz.qumn.alumnihub_app.composable.Avatar
@@ -90,6 +91,7 @@ fun FleaMarketFlowScreen(
     fleaMarketViewModel: FleaMarketViewModel = viewModel(),
     onClickTradeCard: (tradeId: Long) -> Unit
 ) {
+    LoadLoginUserInfo()
     val goodsOverviews = fleaMarketViewModel.goodsRsp.collectAsLazyPagingItems()
     var searchText by remember { mutableStateOf("") }
 

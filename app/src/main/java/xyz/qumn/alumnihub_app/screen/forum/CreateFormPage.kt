@@ -21,6 +21,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +38,7 @@ import xyz.qumn.alumnihub_app.AppState
 import xyz.qumn.alumnihub_app.composable.CircularPulsatingIndicator
 import xyz.qumn.alumnihub_app.composable.ImgGridPicker
 import xyz.qumn.alumnihub_app.composable.useSnack
+import xyz.qumn.alumnihub_app.module.URL
 import xyz.qumn.alumnihub_app.screen.forum.module.PostApi
 import xyz.qumn.alumnihub_app.screen.forum.module.PostCreateReq
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
@@ -45,10 +47,11 @@ import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 @Composable
 fun CreateFormPage(back: () -> Unit) {
     var postCreateReq by remember { mutableStateOf(PostCreateReq.empty()) }
+    val selectedImageUrl = remember { mutableStateListOf<URL>() }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        floatingActionButton = { FloatingButton(postCreateReq, back) },
+        floatingActionButton = { FloatingButton(postCreateReq.copy(imgs = selectedImageUrl.map { it.urn.name }), back) },
         snackbarHost = { AluSnackbarHost() },
         bottomBar = { }
     ) {
@@ -113,15 +116,13 @@ fun CreateFormPage(back: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ImgGridPicker(
-                        postCreateReq.imgs,
+                        selectedImageUrl,
                         onImgAdd = { selectedImages ->
                             Log.d("ImgGridPicker", "ImagePicker: call the on change function")
-                            postCreateReq =
-                                postCreateReq.copy(imgs = postCreateReq.imgs + selectedImages)
+                            selectedImageUrl.addAll(selectedImages)
                         },
                         onImgRemove = { idx ->
-                            postCreateReq =
-                                postCreateReq.copy(imgs = postCreateReq.imgs.filterIndexed { i, _ -> idx != i })
+                            selectedImageUrl.removeAt(idx)
                         }
                     )
                 }

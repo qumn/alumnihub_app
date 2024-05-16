@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.R
+import xyz.qumn.alumnihub_app.SearchApplicationBar
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.useSnack
 import xyz.qumn.alumnihub_app.screen.lostfound.module.LostItem
@@ -94,6 +95,7 @@ class LostFoundViewModel : ViewModel() {
 
 @Composable
 fun LostFoundScreen(lostFoundViewModel: LostFoundViewModel = viewModel()) {
+    var searchText by remember { mutableStateOf("") }
     val snackBarHelper = useSnack()
     val lostItems = lostFoundViewModel.lostItemRsp.collectAsLazyPagingItems()
     var answerItem by remember {
@@ -101,6 +103,11 @@ fun LostFoundScreen(lostFoundViewModel: LostFoundViewModel = viewModel()) {
     }
 
     Scaffold(
+        topBar = {
+            SearchApplicationBar(value = searchText) {
+                searchText = it
+            }
+        },
         snackbarHost = { AluSnackbarHost() },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets

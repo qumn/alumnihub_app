@@ -15,7 +15,7 @@ import xyz.qumn.alumnihub_app.R
 @Composable
 fun ImgGrid(imgs: Collection<Any?>, maxCols: Int = 3) {
     if (imgs.isEmpty()) return
-    val cols = minOf(imgs.size, maxCols)
+    val cols = calculateMaxCols(imgs.size)
     VerticalGrid(columns = SimpleGridCells.Fixed(cols), Modifier.fillMaxWidth()) {
         for (img in imgs) {
             Log.i("ImgGrid", "ImgGrid: $img")
@@ -29,4 +29,11 @@ fun ImgGrid(imgs: Collection<Any?>, maxCols: Int = 3) {
             )
         }
     }
+}
+
+private fun calculateMaxCols(size: Int): Int {
+    if (size <= 2) return size;
+
+    return if (size <= 4) 2
+    else 3
 }

@@ -88,56 +88,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.R
-import xyz.qumn.alumnihub_app.screen.conversation.EMOJIS.EMOJI_CLOUDS
-import xyz.qumn.alumnihub_app.screen.conversation.EMOJIS.EMOJI_FLAMINGO
-import xyz.qumn.alumnihub_app.screen.conversation.EMOJIS.EMOJI_MELTING
-import xyz.qumn.alumnihub_app.screen.conversation.EMOJIS.EMOJI_PINK_HEART
-import xyz.qumn.alumnihub_app.screen.conversation.EMOJIS.EMOJI_POINTS
 import xyz.qumn.alumnihub_app.ui.theme.Alumnihub_appTheme
 
 private val initialMessages = listOf(
     Message(
-        "me",
-        "Check it out!",
-        "8:07 PM"
+        "张三",
+        "可以的",
+        "8:06 PM"
     ),
     Message(
         "me",
-        "Thank you!$EMOJI_PINK_HEART",
-        "8:06 PM",
-        R.drawable.sticker
-    ),
-    Message(
-        "Taylor Brooks",
-        "You can use all the same stuff",
-        "8:05 PM"
-    ),
-    Message(
-        "Taylor Brooks",
-        "@aliconors Take a look at the `Flow.collectAsStateWithLifecycle()` APIs",
-        "8:05 PM"
-    ),
-    Message(
-        "John Glenn",
-        "Compose newbie as well $EMOJI_FLAMINGO, have you looked at the JetNews sample? " +
-                "Most blog posts end up out of date pretty fast but this sample is always up to " +
-                "date and deals with async data loading (it's faked but the same idea " +
-                "applies) $EMOJI_POINTS https://goo.gle/jetnews",
+        "可以优惠一些吗？",
         "8:04 PM"
     ),
+
+    Message(
+        "张三",
+        "你好",
+        "8:06 PM"
+    ),
     Message(
         "me",
-        "Compose newbie: I’ve scourged the internet for tutorials about async data " +
-                "loading but haven’t found any good ones $EMOJI_MELTING $EMOJI_CLOUDS. " +
-                "What’s the recommended way to load async data and emit composable widgets?",
-        "8:03 PM"
-    )
+        "hello",
+        "8:04 PM"
+    ),
 )
 
 
 val exampleUiState = ConversationUiState(
     initialMessages = initialMessages,
-    channelName = "#composers",
+    channelName = "交易聊天",
     channelMembers = 42
 )
 
@@ -253,11 +233,11 @@ fun ChannelNameBar(
                     style = MaterialTheme.typography.titleMedium
                 )
                 // Number of members
-                Text(
-                    text = stringResource(R.string.members, channelMembers),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+//                Text(
+//                    text = stringResource(R.string.members, channelMembers),
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
             }
         },
         actions = {
@@ -324,13 +304,23 @@ fun Messages(
                 }
 
                 item {
-                    Message(
-                        onAuthorClick = { name -> navigateToProfile(name) },
-                        msg = content,
-                        isUserMe = content.author == authorMe,
-                        isFirstMessageByAuthor = isFirstMessageByAuthor,
-                        isLastMessageByAuthor = isLastMessageByAuthor
-                    )
+                    if (content.author == authorMe) {
+                        MessageRight(
+                            onAuthorClick = { name -> navigateToProfile(name) },
+                            msg = content,
+                            isUserMe = content.author == authorMe,
+                            isFirstMessageByAuthor = isFirstMessageByAuthor,
+                            isLastMessageByAuthor = isLastMessageByAuthor
+                        )
+                    } else {
+                        MessageLeft(
+                            onAuthorClick = { name -> navigateToProfile(name) },
+                            msg = content,
+                            isUserMe = content.author == authorMe,
+                            isFirstMessageByAuthor = isFirstMessageByAuthor,
+                            isLastMessageByAuthor = isLastMessageByAuthor
+                        )
+                    }
                 }
             }
         }
@@ -363,7 +353,7 @@ fun Messages(
 }
 
 @Composable
-fun Message(
+fun MessageLeft(
     onAuthorClick: (String) -> Unit,
     msg: Message,
     isUserMe: Boolean,
@@ -411,6 +401,54 @@ fun Message(
 }
 
 @Composable
+fun MessageRight(
+    onAuthorClick: (String) -> Unit,
+    msg: Message,
+    isUserMe: Boolean,
+    isFirstMessageByAuthor: Boolean,
+    isLastMessageByAuthor: Boolean
+) {
+    val borderColor = if (isUserMe) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.tertiary
+    }
+
+    val spaceBetweenAuthors = if (isLastMessageByAuthor) Modifier.padding(top = 8.dp) else Modifier
+    Row(modifier = spaceBetweenAuthors) {
+        AuthorAndTextMessage(
+            msg = msg,
+            isUserMe = isUserMe,
+            isFirstMessageByAuthor = isFirstMessageByAuthor,
+            isLastMessageByAuthor = isLastMessageByAuthor,
+            authorClicked = onAuthorClick,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f)
+        )
+        if (isLastMessageByAuthor) {
+            // Avatar
+            Image(
+                modifier = Modifier
+                    .clickable(onClick = { onAuthorClick(msg.author) })
+                    .padding(horizontal = 16.dp)
+                    .size(42.dp)
+                    .border(1.5.dp, borderColor, CircleShape)
+                    .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                    .clip(CircleShape)
+                    .align(Alignment.Top),
+                painter = painterResource(id = msg.authorImage),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+            )
+        } else {
+            // Space under avatar
+            Spacer(modifier = Modifier.width(74.dp))
+        }
+    }
+}
+
+@Composable
 fun AuthorAndTextMessage(
     msg: Message,
     isUserMe: Boolean,
@@ -419,7 +457,8 @@ fun AuthorAndTextMessage(
     authorClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    val alignment = if (isUserMe) Alignment.End else Alignment.Start
+    Column(modifier = modifier, horizontalAlignment = alignment) {
         if (isLastMessageByAuthor) {
             AuthorNameTimestamp(msg)
         }
@@ -455,7 +494,8 @@ private fun AuthorNameTimestamp(msg: Message) {
     }
 }
 
-private val ChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+private val LeftChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+private val RightChatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
 
 @Composable
 fun DayHeader(dayString: String) {
@@ -501,7 +541,7 @@ fun ChatItemBubble(
     Column {
         Surface(
             color = backgroundBubbleColor,
-            shape = ChatBubbleShape
+            shape = if (isUserMe) RightChatBubbleShape else LeftChatBubbleShape
         ) {
             ClickableMessage(
                 message = message,
@@ -514,7 +554,7 @@ fun ChatItemBubble(
             Spacer(modifier = Modifier.height(4.dp))
             Surface(
                 color = backgroundBubbleColor,
-                shape = ChatBubbleShape
+                shape = RightChatBubbleShape
             ) {
                 Image(
                     painter = painterResource(it),
@@ -628,7 +668,7 @@ fun ConversationPreview() {
 @Composable
 fun ChannelBarPrev() {
     Alumnihub_appTheme {
-        ChannelNameBar(channelName = "composers", channelMembers = 52)
+        ChannelNameBar(channelName = "交易聊天", channelMembers = 52)
     }
 }
 

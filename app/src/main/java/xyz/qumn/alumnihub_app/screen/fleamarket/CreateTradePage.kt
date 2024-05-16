@@ -131,9 +131,10 @@ private fun FloatingButton(
             if (!validationInput(snackHelper, desc, price, selectedImageUrl)) {
                 return@FloatingActionButton
             }
+            val price = (price.toDoubleOrNull()!! * 100).toInt()
             isLoading = true
             CoroutineScope(Dispatchers.IO).launch {
-                publishIdel(desc, price, selectedImageUrl).onSuccess {
+                publishIdel(desc, price.toString(), selectedImageUrl).onSuccess {
                     CoroutineScope(Dispatchers.Main).launch {
                         isLoading = false
                         snackHelper.show("发布成功")

@@ -1,5 +1,6 @@
 package xyz.qumn.alumnihub_app
 
+import android.content.Context
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,6 +15,10 @@ object AppState {
 
     internal val LocalNavController: ProvidableCompositionLocal<NavHostController> =
         staticCompositionLocalOf { error("no nav controller be set") }
+
+    internal val LocalContext: ProvidableCompositionLocal<Context> =
+        staticCompositionLocalOf { error("no nav controller be set") }
+
 
 
     val navController: NavHostController

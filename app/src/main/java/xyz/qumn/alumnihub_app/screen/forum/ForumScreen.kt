@@ -34,6 +34,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +65,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import xyz.qumn.alumnihub_app.AluSnackbarHost
 import xyz.qumn.alumnihub_app.AppState
+import xyz.qumn.alumnihub_app.SearchApplicationBar
 import xyz.qumn.alumnihub_app.composable.Avatar
 import xyz.qumn.alumnihub_app.composable.ImgGrid
 import xyz.qumn.alumnihub_app.screen.forum.module.Post
@@ -99,8 +104,14 @@ fun ForumScreen(
     onClickPostCard: (postId: Long) -> Unit
 ) {
     val postPage = forumViewModel.postRsp.collectAsLazyPagingItems()
+    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
+        topBar = {
+            SearchApplicationBar(value = searchText) {
+                searchText = it
+            }
+        },
         snackbarHost = { AluSnackbarHost() },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets
